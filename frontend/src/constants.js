@@ -52,6 +52,13 @@ export const ADOPTION_ORDER_STATUS = {
   CANCELLED: '已取消',
 }
 
+export const SHOP_ORDER_STATUS = {
+  PENDING_PAYMENT: '待支付',
+  PAID: '已支付待发货',
+  SHIPPED: '已发货',
+  COMPLETED: '已完成',
+}
+
 export const PRODUCT_GRADE = {
   PREMIUM: '特级',
   FIRST: '一级',

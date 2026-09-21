@@ -58,6 +58,12 @@
     </template>
 
     <div class="card entry-grid">
+      <div class="entry-card" style="box-shadow:none;border:1px solid #eee" @click="$router.push('/consumer/shop')">
+        <div class="icon">🛒</div><div class="name">在线商城</div>
+      </div>
+      <div class="entry-card" style="box-shadow:none;border:1px solid #eee" @click="$router.push('/consumer/orders')">
+        <div class="icon">📦</div><div class="name">我的订单</div>
+      </div>
       <div class="entry-card" style="box-shadow:none;border:1px solid #eee" @click="$router.push('/consumer/adopt')">
         <div class="icon">🌱</div><div class="name">认养一块田</div>
       </div>
@@ -69,14 +75,20 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { showToast } from 'vant'
 import api from '../../api'
 import { RECORD_TYPES, PRODUCT_GRADE, mapOf, DEMO_TRACE_CODE } from '../../constants'
 
-const code = ref(DEMO_TRACE_CODE)
+const route = useRoute()
+const code = ref(typeof route.query.code === 'string' && route.query.code ? route.query.code : DEMO_TRACE_CODE)
 const trace = ref(null)
 const loading = ref(false)
+
+onMounted(() => {
+  if (code.value) query()
+})
 
 const sortedRecords = computed(() => {
   if (!trace.value) return []

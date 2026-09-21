@@ -13,6 +13,8 @@ import FarmerMine from './views/farmer/Mine.vue'
 import ConsumerTrace from './views/consumer/Trace.vue'
 import ConsumerAdopt from './views/consumer/Adopt.vue'
 import ConsumerMine from './views/consumer/Mine.vue'
+import ConsumerShop from './views/consumer/Shop.vue'
+import ConsumerOrders from './views/consumer/Orders.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -51,6 +53,8 @@ const router = createRouter({
     { path: '/consumer', component: ConsumerTrace },
     { path: '/consumer/adopt', component: ConsumerAdopt, meta: { role: 'CONSUMER' } },
     { path: '/consumer/mine', component: ConsumerMine, meta: { role: 'CONSUMER' } },
+    { path: '/consumer/shop', component: ConsumerShop },
+    { path: '/consumer/orders', component: ConsumerOrders, meta: { role: 'CONSUMER' } },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })
