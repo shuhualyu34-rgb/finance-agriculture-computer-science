@@ -23,6 +23,7 @@ services:
       # 首次启动自动建库导数据(按文件名顺序执行)
       - ./danqiu_platform_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./danqiu_rice_seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
     ports:
       - "127.0.0.1:3307:3306"   # 宿主机 3307 -> 容器 3306,便于本地调试
 
@@ -39,9 +40,12 @@ services:
       DANQIU_DB_USER: root
       DANQIU_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-danqiu_dev_root}
       DANQIU_DB_NAME: danqiu_rice
+      DANQIU_JWT_SECRET: ${DANQIU_JWT_SECRET:-danqiu-dev-secret-change-me}
       TZ: Asia/Shanghai
     ports:
       - "127.0.0.1:8010:8010"
+    volumes:
+      - danqiu-uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -54,3 +58,4 @@ services:
 
 volumes:
   danqiu-mysql-data:
+  danqiu-uploads:
