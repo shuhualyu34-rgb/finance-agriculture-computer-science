@@ -266,3 +266,77 @@ def test_admin_dividends_and_cert_review(farmer):
 
     pending = httpx.get(f"{BASE}/api/admin/certifications", headers=token, timeout=5).json()
     assert isinstance(pending, list)
+
+
+def test_government_dashboard_public():
+    r = httpx.get(f"{BASE}/api/government/dashboard", timeout=10)
+    assert r.status_code == 200
+    body = r.json()
+    assert {"cards", "map", "dynamics"} <= set(body)
+    assert body["cards"]["total_farmers"] >= 200
+    assert body["map"]["plots"], "地图应包含地块边界"
+    assert body["dynamics"], "应有最新业务动态"
+
+
+def test_operator_standards_and_trace_codes(farmer):
+    operator = login("13799943797")  # 品牌运营专员
+    token = auth(operator["access_token"])
+
+    standards = httpx.get(f"{BASE}/api/operator/standards", headers=token, timeout=5).json()
+    assert standards, "应已有标准版本"
+    assert standards[0]["clauses"], "标准版本应含条款"
+
+    r = httpx.post(
+        f"{BASE}/api/operator/trace-codes",
+        headers=token,
+        json={"plot_id": 1, "batch_name": "集成测试批次", "product_grade": "FIRST"},
+        timeout=5,
+    )
+    assert r.status_code == 201, r.text
+    code = r.json()["code"]
+    assert len(code) == 16
+    trace = httpx.get(f"{BASE}/api/trace/{code}", timeout=5)
+    assert trace.status_code == 200
+    tid = r.json()["id"]
+    rv = httpx.put(f"{BASE}/api/operator/trace-codes/{tid}/disable", headers=token, timeout=5)
+    assert rv.status_code == 200
+    trace2 = httpx.get(f"{BASE}/api/trace/{code}", timeout=5)
+    assert trace2.status_code == 404
+    r2 = httpx.get(f"{BASE}/api/operator/standards", headers=auth(farmer["access_token"]), timeout=5)
+    assert r2.status_code == 403
+
+
+def test_admin_users_plots_and_config():
+    admin = login(ADMIN_PHONE)
+    token = auth(admin["access_token"])
+
+    users = httpx.get(f"{BASE}/api/admin/users", headers=token, params={"role": "FARMER"}, timeout=5).json()
+    assert len(users) >= 200
+
+    plots = httpx.get(f"{BASE}/api/admin/plots", headers=token, timeout=5).json()
+    assert plots, "应有地块"
+    target = next(p for p in plots if p["open_for_adoption"] == 0)
+    rv = httpx.put(
+        f"{BASE}/api/admin/plots/{target['id']}/adoption", headers=token, json={"open": True}, timeout=5
+    )
+    assert rv.status_code == 200 and rv.json()["open_for_adoption"] is True
+    back = httpx.put(
+        f"{BASE}/api/admin/plots/{target['id']}/adoption", headers=token, json={"open": False}, timeout=5
+    )
+    assert back.status_code == 200
+
+    products = httpx.get(f"{BASE}/api/admin/insurance-products", headers=token, timeout=5).json()
+    assert products, "应有保险产品"
+    p1 = products[0]
+    upd = httpx.put(
+        f"{BASE}/api/admin/insurance-products/{p1['id']}",
+        headers=token,
+        json={
+            "insured_amount_per_mu": float(p1["insured_amount_per_mu"]),
+            "premium_rate": float(p1["premium_rate"]),
+            "government_subsidy_rate": float(p1["government_subsidy_rate"]),
+        },
+        timeout=5,
+    )
+    assert upd.status_code == 200
+

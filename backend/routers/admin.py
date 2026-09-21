@@ -4,9 +4,11 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from backend.auth import CurrentUser
+from backend.auth import CurrentUser, require_roles
 from backend.db import query, query_one, transaction
 from backend.rules import DEFAULT_DIVIDEND_RATE, dividend_amount
+
+AdminOnly = require_roles("ADMIN")
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -102,4 +104,106 @@ def calculate_dividends(user: CurrentUser) -> dict[str, Any]:
         "dividends_created": created,
         "dividend_rate": float(DEFAULT_DIVIDEND_RATE),
         "total_dividend_amount": round(total_amount, 2),
+    }
+
+
+# ---- 系统管理后台(PRD v5 §4.7)----------------------------------------
+
+
+@router.get("/users")
+def users(user: CurrentUser, role: str | None = None, q: str | None = None) -> list[dict[str, Any]]:
+    """用户管理:全部角色账号(仅管理员)。"""
+    AdminOnly(user)
+    sql = """
+      SELECT u.id, u.username, u.real_name, u.phone, u.status, u.created_at,
+             GROUP_CONCAT(r.role_name) AS roles
+      FROM sys_user u
+      LEFT JOIN sys_user_role ur ON ur.user_id = u.id
+      LEFT JOIN sys_role r ON r.id = ur.role_id
+    """
+    conds: list[str] = []
+    params: list[Any] = []
+    if role:
+        conds.append(
+            "u.id IN (SELECT ur2.user_id FROM sys_user_role ur2"
+            " JOIN sys_role r2 ON r2.id = ur2.role_id WHERE r2.role_code = %s)"
+        )
+        params.append(role)
+    if q:
+        conds.append("(u.real_name LIKE %s OR u.phone LIKE %s)")
+        params.extend([f"%{q}%", f"%{q}%"])
+    if conds:
+        sql += " WHERE " + " AND ".join(conds)
+    sql += " GROUP BY u.id ORDER BY u.id LIMIT 300"
+    return query(sql, tuple(params))
+
+
+@router.get("/plots")
+def admin_plots(user: CurrentUser, adoptable: int | None = None) -> list[dict[str, Any]]:
+    """认养管理:地块列表与开放认养状态(仅管理员)。"""
+    AdminOnly(user)
+    sql = """
+      SELECT p.id, p.plot_code, p.plot_name, p.village, p.area_mu, p.variety,
+             p.status, p.open_for_adoption,
+             (SELECT COUNT(*) FROM adoption_order a
+               WHERE a.plot_id = p.id AND a.status IN ('PAID','ACTIVE')) AS adopted_count
+      FROM farm_plot p
+    """
+    params: tuple[Any, ...] = ()
+    if adoptable is not None:
+        sql += " WHERE p.open_for_adoption = %s"
+        params = (adoptable,)
+    sql += " ORDER BY p.id LIMIT 500"
+    return query(sql, params)
+
+
+@router.put("/plots/{plot_id}/adoption")
+def set_adoption_flag(user: CurrentUser, plot_id: int, body: dict[str, bool]) -> dict[str, Any]:
+    """认养管理:开/关某块地的认养(仅管理员)。body: {"open": true|false}"""
+    AdminOnly(user)
+    plot = query_one("SELECT id FROM farm_plot WHERE id = %s", (plot_id,))
+    if not plot:
+        raise HTTPException(status_code=404, detail="地块不存在")
+    open_flag = 1 if body.get("open") else 0
+    with transaction() as tx:
+        tx["cursor"].execute(
+            "UPDATE farm_plot SET open_for_adoption = %s WHERE id = %s", (open_flag, plot_id)
+        )
+    return {"id": plot_id, "open_for_adoption": bool(open_flag)}
+
+
+@router.get("/insurance-products")
+def insurance_products() -> list[dict[str, Any]]:
+    """数据配置:保险产品参数。"""
+    return query("SELECT * FROM insurance_product ORDER BY id")
+
+
+@router.put("/insurance-products/{product_id}")
+def update_insurance_product(
+    user: CurrentUser, product_id: int, body: dict[str, Any]
+) -> dict[str, Any]:
+    """数据配置:调整保额/费率(PRD:保险费率、贷款建议参数可配,仅管理员)。"""
+    AdminOnly(user)
+    product = query_one("SELECT * FROM insurance_product WHERE id = %s", (product_id,))
+    if not product:
+        raise HTTPException(status_code=404, detail="保险产品不存在")
+    per_mu = body.get("insured_amount_per_mu", product["insured_amount_per_mu"])
+    rate = body.get("premium_rate", product["premium_rate"])
+    subsidy = body.get("government_subsidy_rate", product["government_subsidy_rate"])
+    if not (0 < float(per_mu) and 0 < float(rate) < 1 and 0 <= float(subsidy) < 1):
+        raise HTTPException(status_code=400, detail="参数取值不合法")
+    with transaction() as tx:
+        tx["cursor"].execute(
+            """
+            UPDATE insurance_product
+            SET insured_amount_per_mu = %s, premium_rate = %s, government_subsidy_rate = %s
+            WHERE id = %s
+            """,
+            (per_mu, rate, subsidy, product_id),
+        )
+    return {
+        "id": product_id,
+        "insured_amount_per_mu": float(per_mu),
+        "premium_rate": float(rate),
+        "government_subsidy_rate": float(subsidy),
     }

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>丹邱丝苗米产业运行监管驾驶舱</title>
+<script src="echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: radial-gradient(1200px 600px at 50% -10%, #123a5e 0%, #0a1a2e 55%, #060d18 100%);
+    color: #d7e7f5; font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    min-height: 100vh; overflow: hidden;
+  }
+  .screen { display: grid; grid-template-rows: 64px 1fr 190px; height: 100vh; padding: 12px 16px; gap: 12px; }
+  header { display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(90deg, rgba(28,80,130,.55), rgba(12,35,60,.4));
+    border: 1px solid #2a5d8f; border-radius: 8px; padding: 0 22px; }
+  header h1 { font-size: 26px; letter-spacing: 4px; color: #7fd4ff;
+    text-shadow: 0 0 14px rgba(80,180,255,.55); font-weight: 700; }
+  header .right { text-align: right; font-size: 14px; color: #9fc3e0; }
+  header .clock { font-size: 20px; color: #bfe6ff; font-family: Consolas, monospace; }
+  main { display: grid; grid-template-columns: 1.35fr 1fr; gap: 12px; min-height: 0; }
+  .panel { border: 1px solid #2a5d8f; border-radius: 8px; background: rgba(10,30,52,.55);
+    display: flex; flex-direction: column; overflow: hidden; }
+  .panel-title { font-size: 15px; padding: 8px 14px; color: #8fd0ff; letter-spacing: 2px;
+    border-bottom: 1px solid #1d4772; background: linear-gradient(90deg, rgba(38,90,145,.5), transparent); }
+  .panel-title::before { content: "▍"; color: #57c2ff; margin-right: 6px; }
+  #map { flex: 1; min-height: 0; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; align-content: start; overflow-y: auto; }
+  .card { border: 1px solid #24557f; border-radius: 8px; padding: 12px 14px; background: rgba(16,45,75,.6); }
+  .card .label { font-size: 13px; color: #9fc3e0; }
+  .card .value { font-size: 26px; font-weight: 700; color: #ffe9a8; margin-top: 4px;
+    font-family: Consolas, monospace; text-shadow: 0 0 10px rgba(255,220,140,.35); }
+  .card .value small { font-size: 13px; color: #9fc3e0; font-weight: 400; margin-left: 3px; }
+  .card.hl .value { color: #7dffb5; text-shadow: 0 0 10px rgba(90,255,160,.35); }
+  footer { border: 1px solid #2a5d8f; border-radius: 8px; background: rgba(10,30,52,.55); overflow: hidden; display: flex; flex-direction: column; }
+  .ticker { flex: 1; overflow: hidden; position: relative; padding: 6px 0; }
+  .ticker ul { list-style: none; animation: scrollUp 26s linear infinite; }
+  .ticker li { line-height: 34px; padding: 0 18px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ticker li .tag { display: inline-block; min-width: 40px; text-align: center; border-radius: 4px;
+    margin-right: 10px; padding: 1px 6px; font-size: 12px; background: #1d4772; color: #7fd4ff; }
+  .ticker li .tag.农事 { background: #1e5c40; color: #8affc4; }
+  .ticker li .tag.投保 { background: #5c4a1e; color: #ffe1a8; }
+  .ticker li .tag.理赔 { background: #5c1e1e; color: #ffb0b0; }
+  .ticker li .tag.认养 { background: #3a1e5c; color: #d5b0ff; }
+  .ticker li .tag.贷款 { background: #1e4a5c; color: #a8e6ff; }
+  .ticker li .tag.订单 { background: #5c2e1e; color: #ffc4a8; }
+  @keyframes scrollUp { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+  .legend { display: flex; gap: 16px; padding: 8px 16px 2px; font-size: 12px; color: #9fc3e0; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <header>
+    <h1>丹邱丝苗米产业运行监管驾驶舱</h1>
+    <div class="right">
+      <div class="clock" id="clock">--:--:--</div>
+      <div id="date">----年--月--日</div>
+    </div>
+  </header>
+  <main>
+    <div class="panel">
+      <div class="panel-title">丹邱村地块分布(按认证状态着色 · 滚轮缩放)</div>
+      <div class="legend">
+        <span><i style="background:#2fa866"></i>已认证地块</span>
+        <span><i style="background:#d9a521"></i>认证中/整改</span>
+        <span><i style="background:#4b6f93"></i>未认证</span>
+        <span><i style="background:#8a5fd0"></i>开放认养(描边)</span>
+      </div>
+      <div id="map"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">产业核心指标(实时)</div>
+      <div class="cards" id="cards"></div>
+    </div>
+  </main>
+  <footer>
+    <div class="panel-title">最新业务动态</div>
+    <div class="ticker"><ul id="ticker"></ul></div>
+  </footer>
+</div>
+
+<script>
+const API = location.origin.includes('8010') ? '' : 'http://127.0.0.1:8010';
+const fmtTime = (t, i) => {
+  if (!t) return '';
+  const d = new Date(t);
+  const p = n => String(n).padStart(2, '0');
+  const date = d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+  return i ? date + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) : date;
+};
+
+function tick() {
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  document.getElementById('clock').textContent = p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  document.getElementById('date').textContent = d.getFullYear() + '年' + p(d.getMonth()+1) + '月' + p(d.getDate()) + '日';
+}
+setInterval(tick, 1000); tick();
+
+const CARD_DEFS = [
+  ['certified_farmers', '认证农户', '户', true], ['total_farmers', '农户总数', '户'],
+  ['loan_applications', '贷款申请', '笔'], ['approved_loan_amount', '银行放款额', '元', true],
+  ['policy_count', '保单数', '份'], ['insured_amount_total', '总保额', '元', true],
+  ['paid_claim_amount', '已赔金额', '元', true], ['claim_count', '理赔件数', '件'],
+  ['adoption_consumers', '认养消费者', '人', true], ['adoption_count', '认养订单', '单'],
+  ['platform_sales_amount', '平台销售额', '元'], ['pending_dividend', '待结算分红', '元'],
+  ['production_records', '农事记录', '条'], ['inspection_warnings', '巡检预警', '次'],
+];
+
+function renderCards(cards) {
+  const box = document.getElementById('cards');
+  box.innerHTML = CARD_DEFS.map(([k, label, unit, hl]) => {
+    let v = cards[k] ?? 0;
+    v = Number(v);
+    const text = v >= 10000 ? (v / 10000).toFixed(1) + '<small>万</small>' : Math.round(v * 100) / 100;
+    return '<div class="card' + (hl ? ' hl' : '') + '"><div class="label">' + label + '</div><div class="value">' + text + '<small>' + unit + '</small></div></div>';
+  }).join('');
+}
+
+function certColor(plot) {
+  if (plot.cert_status === 'APPROVED') return '#2fa866';
+  if (plot.cert_status === 'PENDING' || plot.cert_status === 'RECTIFYING') return '#d9a521';
+  return '#4b6f93';
+}
+
+function renderMap(map) {
+  const el = document.getElementById('map');
+  const chart = echarts.init(el);
+  const plots = (map.plots || []).filter(p => p.boundary && p.boundary.coordinates && p.boundary.coordinates[0]);
+  let lngs = [], lats = [];
+  plots.forEach(p => p.boundary.coordinates[0].forEach(c => { lngs.push(c[0]); lats.push(c[1]); }));
+  const pad = Math.max((Math.max(lngs) - Math.min(lngs)) * 0.08, 0.0005);
+  const yPad = Math.max((Math.max(lats) - Math.min(lats)) * 0.08, 0.0005);
+
+  chart.setOption({
+    tooltip: {
+      formatter: params => {
+        const p = params.data;
+        if (!p || !p.name) return '';
+        return '<b>' + p.name + '</b><br/>' + p.village + ' · ' + p.area_mu + ' 亩<br/>品种:' + p.variety +
+          '<br/>认证:' + (p.cert_status === 'APPROVED' ? '已认证' : p.cert_status === 'PENDING' ? '认证中' : p.cert_status === 'RECTIFYING' ? '整改中' : p.cert_status === 'REJECTED' ? '未通过' : '未认证') +
+          (p.open_for_adoption ? '<br/>⭐ 开放认养' : '');
+      }
+    },
+    grid: { left: 46, right: 20, top: 24, bottom: 40 },
+    xAxis: { min: Math.min(...lngs) - pad, max: Math.max(...lngs) + pad, show: false },
+    yAxis: { min: Math.min(...lats) - yPad, max: Math.max(...lats) + yPad, show: false },
+    dataZoom: [{ type: 'inside' }],
+    series: [
+      {
+        type: 'custom', coordinateSystem: 'cartesian2d',
+        data: plots.map(p => ({
+          name: p.plot_name, village: p.village, area_mu: p.area_mu, variety: p.variety,
+          cert_status: p.cert_status, open_for_adoption: p.open_for_adoption,
+          value: [p.longitude, p.latitude],
+          poly: p.boundary.coordinates[0], color: certColor(p)
+        })),
+        renderItem: (params, api) => {
+          const points = params.data.poly.map(c => api.coord(c));
+          return {
+            type: 'polygon',
+            shape: { points },
+            style: {
+              fill: params.data.color, opacity: 0.82,
+              stroke: params.data.open_for_adoption ? '#b98aff' : 'rgba(255,255,255,.55)',
+              lineWidth: params.data.open_for_adoption ? 2 : 0.8
+            },
+            emphasisStyle: { fill: '#7fd4ff', opacity: 1 }
+          };
+        }
+      },
+      {
+        type: 'scatter', coordinateSystem: 'cartesian2d',
+        symbolSize: 0, label: { show: false },
+        data: plots.map(p => ({ value: [p.longitude, p.latitude], name: p.plot_name })),
+        tooltip: { show: false }
+      }
+    ]
+  });
+  window.addEventListener('resize', () => chart.resize());
+}
+
+function renderTicker(items) {
+  const ul = document.getElementById('ticker');
+  const html = items.map(it =>
+    '<li><span class="tag ' + it.type + '">' + it.type + '</span>' +
+    (it.time ? '[' + fmtTime(it.time, 1) + '] ' : '') + it.text + '</li>'
+  ).join('');
+  ul.innerHTML = html + html;  // 双份实现无缝滚动
+}
+
+async function refresh() {
+  try {
+    const res = await fetch(API + '/api/government/dashboard');
+    const data = await res.json();
+    renderCards(data.cards);
+    renderMap(data.map);
+    renderTicker(data.dynamics || []);
+  } catch (e) {
+    console.error('刷新失败', e);
+  }
+}
+refresh();
+setInterval(refresh, 60000);  // PRD:大屏数字随后台更新
+</script>
+</body>
+</html>
