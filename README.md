@@ -65,17 +65,40 @@ pytest                        # 单元 + 集成(API 未启动时集成用例自�
 ## 目录结构
 
 ```
-backend/                 FastAPI 后端(当前:Phase 1 只读 API)
-  app.py                 8 个只读接口 + health
-  tests/                 pytest 测试
+backend/                 FastAPI 后端(阶段 1:鉴权 + 写入闭环)
+  app.py                 路由装配
+  auth.py / config.py / db.py / rules.py / schemas.py
+  routers/               overview(只读)/ auth / farmer / consumer / bank / insurance / admin / uploads
+  tests/                 pytest(30 用例:单元 + 全链路集成)
+frontend/                H5 前端(农户端 + 消费端,Vite + Vue3 + Vant)
 regional-brand-api/      区域公用品牌平台 API 设计稿(OpenAPI 3.0,B 线)
+migrations/              增量迁移(001:认养开放标记)
 danqiu_platform_schema.sql   数据库结构(24 张表,含建库语句)
 danqiu_rice_seed.sql         种子数据(200 户,由 generate_danqiu_seed.py 生成)
-danqiu_platform_mock.sql     小规模演示数据(与种子数据二选一)
 docker-compose.yml       db(mysql:8.0) + api(FastAPI)
 Dockerfile               后端镜像
 *.html                   各端静态原型
 ```
+
+## 阶段 1 API 概览
+
+鉴权:`POST /api/auth/login`(手机号 + 验证码 1234)→ JWT Bearer。演示账号:
+
+| 角色 | 手机号 | 说明 |
+|---|---|---|
+| 农户 | 13800015892 | 黄强,有多块地 |
+| 消费者 | 13900015066 | 张玲 |
+| 银行 | 13764807553 | 农行审批员 |
+| 保险 | 13753091709 | 人保核保员 |
+| 管理员 | 13765250068 | 平台管理员 |
+
+- 农户端 `/api/my/*`:summary、plots、records(GET/POST)、certifications(GET/POST)、policies、insurance(POST)、loans(GET/POST)、claims、dividends
+- 消费端:`GET /api/adoption/plots`、`POST /api/adoption/orders`(模拟支付)
+- 银行端 `/api/bank/*`:loans、farmers/{id} 画像、loans/{id}/review
+- 保险端 `/api/insurance/*`:policies、claims(GET/POST/PUT review)
+- 管理端 `/api/admin/*`:certifications 审批、dividends/calculate
+- 上传:`POST /api/uploads`(multipart)→ `/uploads/...` 静态访问
+- 溯源演示码:`0C2895566118471E`
 
 ## 核心业务规则(PRD 第六节)
 
@@ -86,6 +109,8 @@ Dockerfile               后端镜像
 ## 开发路线
 
 - [x] 阶段 0:工程基线(Docker 化、git、测试基线)
-- [ ] 阶段 1:鉴权 + 农户端/消费端 H5 + 写入闭环(农事上传 → 认证/保险/贷款申请 → 订单/认养/分红)
+- [x] 阶段 1a:后端鉴权 + 写入闭环(30 用例全过)
+- [ ] 阶段 1b:农户端/消费端 H5(开发中,frontend/)
+- [ ] 阶段 2:银行/保险/品牌运营/政府监管 Web 端 + 监管报表
 - [ ] 阶段 2:银行/保险/品牌运营/政府监管 Web 端 + 监管报表
 - [ ] 阶段 3:B 线区域公用品牌平台(见 regional-brand-api/)
