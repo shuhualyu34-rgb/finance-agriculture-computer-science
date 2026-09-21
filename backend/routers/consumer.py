@@ -14,6 +14,28 @@ router = APIRouter(prefix="/api", tags=["consumer"])
 
 ConsumerUser = require_roles("CONSUMER")
 
+
+@router.get("/my/adoptions")
+def my_adoptions(user: CurrentUser) -> list[dict[str, Any]]:
+    """我的认养列表(消费端)。"""
+    return query(
+        """
+        SELECT a.id, a.order_no, a.fee, a.status, a.started_at,
+               p.plot_name, p.plot_code, p.village, p.area_mu, p.variety,
+               p.satellite_image_url, u.real_name AS farmer_name,
+               (SELECT COUNT(*) FROM farm_record r
+                 WHERE r.plot_id = p.id
+                   AND r.record_date >= a.started_at) AS updates_since_adopted
+        FROM adoption_order a
+        JOIN farm_plot p ON p.id = a.plot_id
+        JOIN farmer_profile f ON f.id = p.farmer_id
+        JOIN sys_user u ON u.id = f.user_id
+        WHERE a.consumer_user_id = %s
+        ORDER BY a.id DESC
+        """,
+        (user["id"],),
+    )
+
 # 认养费(MVP):面积 × 100 元/亩,最低 199 元
 ADOPTION_FEE_PER_MU = 100
 ADOPTION_FEE_MIN = 199

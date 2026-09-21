@@ -246,6 +246,11 @@ def test_consumer_adoption(consumer):
     assert body["status"] == "PAID"  # Demo 模拟支付
     dup = httpx.post(f"{BASE}/api/adoption/orders", headers=token, json={"plot_id": target["id"]}, timeout=5)
     assert dup.status_code == 409
+    # 我的认养列表应包含刚下的单
+    mine = httpx.get(f"{BASE}/api/my/adoptions", headers=token, timeout=5).json()
+    adopted = [x for x in mine if x["plot_name"] == target["plot_name"]]
+    assert adopted and adopted[0]["status"] == "PAID"
+    assert {"order_no", "fee", "farmer_name", "updates_since_adopted"} <= set(adopted[0])
 
 
 def test_admin_dividends_and_cert_review(farmer):
