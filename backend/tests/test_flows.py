@@ -340,3 +340,67 @@ def test_admin_users_plots_and_config():
     )
     assert upd.status_code == 200
 
+
+def test_mall_full_loop_to_dividend(consumer):
+    """PRD §12:消费者下单 -> 模拟支付 -> 运营发货 -> 确认收货 -> 农户分红。"""
+    token = auth(consumer["access_token"])
+
+    products = httpx.get(f"{BASE}/api/shop/products", timeout=5).json()
+    assert products, "商城应有在售商品"
+    product = next((p for p in products if p["stock"] >= 2), products[0])
+    qty = 2 if product["stock"] >= 2 else 1
+
+    r = httpx.post(
+        f"{BASE}/api/shop/orders",
+        headers=token,
+        json={
+            "items": [{"product_id": product["id"], "quantity": qty}],
+            "receiver": "张玲",
+            "phone": CONSUMER_PHONE,
+            "detail_address": "广州市增城区朱村街道测试地址 8 栋",
+        },
+        timeout=5,
+    )
+    assert r.status_code == 201, r.text
+    order = r.json()
+    assert order["status"] == "PENDING_PAYMENT"
+    assert order["total_amount"] == round(float(product["price"]) * qty, 2)
+    order_id = order["id"]
+
+    early = httpx.post(f"{BASE}/api/shop/orders/{order_id}/confirm", headers=token, timeout=5)
+    assert early.status_code == 409
+
+    pay = httpx.post(f"{BASE}/api/shop/orders/{order_id}/pay", headers=token, timeout=5)
+    assert pay.status_code == 200 and pay.json()["status"] == "PAID"
+
+    mine = httpx.get(f"{BASE}/api/shop/my-orders", headers=token, timeout=5).json()
+    target = next(o for o in mine if o["id"] == order_id)
+    assert target["items"][0]["product_name"] == product["product_name"]
+
+    operator = login("13799943797")
+    ot = auth(operator["access_token"])
+    r = httpx.put(
+        f"{BASE}/api/shop/orders/{order_id}/ship",
+        headers=ot,
+        json={"carrier": "顺丰速运", "tracking_no": "SF1234567890"},
+        timeout=5,
+    )
+    assert r.status_code == 200, r.text
+    ops_orders = httpx.get(
+        f"{BASE}/api/shop/orders", headers=ot, params={"status": "SHIPPED"}, timeout=5
+    ).json()
+    assert any(o["id"] == order_id and o["tracking_no"] == "SF1234567890" for o in ops_orders)
+
+    confirm = httpx.post(f"{BASE}/api/shop/orders/{order_id}/confirm", headers=token, timeout=5)
+    assert confirm.status_code == 200 and confirm.json()["status"] == "COMPLETED"
+
+    admin = login(ADMIN_PHONE)
+    calc = httpx.post(f"{BASE}/api/admin/dividends/calculate", headers=auth(admin["access_token"]), timeout=10)
+    assert calc.status_code == 200
+    body = calc.json()
+    assert body["dividends_created"] >= 1, "新完成订单应计提分红"
+    assert body["total_dividend_amount"] > 0
+    calc2 = httpx.post(f"{BASE}/api/admin/dividends/calculate", headers=auth(admin["access_token"]), timeout=10)
+    assert calc2.json()["dividends_created"] == 0
+
+

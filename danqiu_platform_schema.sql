@@ -4,6 +4,7 @@
 
 CREATE DATABASE IF NOT EXISTS danqiu_rice DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE danqiu_rice;
+SET NAMES utf8mb4;
 
 -- 1. 用户与角色
 CREATE TABLE sys_user (

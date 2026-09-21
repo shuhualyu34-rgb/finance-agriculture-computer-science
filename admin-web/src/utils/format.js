@@ -13,7 +13,7 @@ export function fmtMoney(n) {
 
 export const loanResultMap = { PENDING: '待审批', APPROVED: '已通过', REJECTED: '已驳回' }
 export const certStatusMap = { PENDING: '待审核', APPROVED: '已通过', REJECTED: '已驳回', RECTIFYING: '退回整改', CERTIFIED: '已认证', UNCERTIFIED: '未认证' }
-export const policyStatusMap = { PENDING: '待生效', ACTIVE: '保障中', EXPIRED: '已到期', CLAIMED: '已理赔' }
+export const policyStatusMap = { PENDING: '待生效', APPLIED: '已投保', ACTIVE: '保障中', EXPIRED: '已到期', CLAIMED: '已理赔' }
 export const claimStatusMap = { SUBMITTED: '待复核', APPROVED: '复核通过', REJECTED: '已驳回', PAID: '已赔付' }
 export const traceStatusMap = { ACTIVE: '启用', DISABLED: '已停用' }
 export const userStatusMap = { ACTIVE: '正常', DISABLED: '已禁用' }

@@ -18,6 +18,7 @@ from backend.routers import (
     insurance,
     operator,
     overview,
+    shop,
     uploads,
 )
 
@@ -39,8 +40,9 @@ app.include_router(government.router)
 # 农户端 H5
 app.include_router(farmer.router, dependencies=[Depends(require_roles("FARMER"))])
 
-# 消费端 H5
+# 消费端 H5 + 在线商城
 app.include_router(consumer.router)
+app.include_router(shop.router)
 
 # 银行端 / 保险公司端
 app.include_router(bank.router, dependencies=[Depends(require_roles("BANK", "ADMIN"))])
