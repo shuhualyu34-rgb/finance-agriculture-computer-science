@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>乡品共富 · 农户端原型</title>
+  <style>
+    :root {
+      --blue: #1F4E79;
+      --blue-dark: #173b5c;
+      --green: #548235;
+      --green-light: #e9f1e3;
+      --cream: #f7f8f4;
+      --ink: #20313f;
+      --muted: #75828b;
+      --line: #e8ece7;
+      --orange: #d78b32;
+      --red: #b85c4d;
+      --shadow: 0 8px 24px rgba(31, 78, 121, .08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #e8edf0; color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    body { display: flex; justify-content: center; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .phone { width: 375px; min-height: 100vh; background: var(--cream); position: relative; overflow: hidden; box-shadow: 0 0 42px rgba(0,0,0,.12); }
+    .app { min-height: 100vh; padding-bottom: 82px; }
+    .topbar { color: white; background: linear-gradient(135deg, var(--blue), #2f678f); padding: 23px 20px 26px; border-radius: 0 0 24px 24px; position: relative; overflow: hidden; }
+    .topbar::after { content: ""; position: absolute; width: 140px; height: 140px; border: 1px solid rgba(255,255,255,.14); border-radius: 50%; right: -36px; top: -54px; box-shadow: 0 0 0 15px rgba(255,255,255,.035), 0 0 0 30px rgba(255,255,255,.025); }
+    .toprow { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
+    .eyebrow { font-size: 12px; opacity: .78; letter-spacing: 1px; }
+    .brand { font-size: 23px; font-weight: 750; margin-top: 5px; letter-spacing: 1px; }
+    .avatar { width: 39px; height: 39px; border-radius: 50%; display: grid; place-items: center; background: #d8e6d1; color: var(--green); font-weight: 700; border: 2px solid rgba(255,255,255,.65); }
+    .hero-meta { margin-top: 19px; display: flex; gap: 9px; position: relative; z-index: 1; }
+    .hero-chip { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.16); padding: 8px 11px; border-radius: 10px; font-size: 12px; }
+    .view { display: none; animation: rise .22s ease-out; }
+    .view.active { display: block; }
+    @keyframes rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .content { padding: 18px 16px 0; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; margin: 3px 2px 12px; }
+    .section-title { font-size: 18px; font-weight: 750; color: var(--blue); }
+    .section-note { font-size: 12px; color: var(--muted); }
+    .card { background: white; border-radius: 15px; box-shadow: var(--shadow); border: 1px solid rgba(232,236,231,.8); }
+    .batch-card { padding: 15px; margin-bottom: 12px; position: relative; }
+    .batch-head { display: flex; justify-content: space-between; align-items: start; }
+    .batch-title { font-size: 16px; font-weight: 700; }
+    .batch-id { color: var(--muted); font-size: 11px; margin-top: 5px; }
+    .status { display: inline-flex; align-items: center; gap: 4px; border-radius: 99px; padding: 5px 8px; font-size: 11px; white-space: nowrap; }
+    .status::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .status.green { background: #ecf5e9; color: var(--green); }
+    .status.orange { background: #fff5e5; color: var(--orange); }
+    .status.blue { background: #eaf1f8; color: var(--blue); }
+    .batch-info { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); margin-top: 13px; padding-top: 12px; gap: 10px; }
+    .metric-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .metric-value { font-size: 13px; font-weight: 650; }
+    .progress { height: 6px; background: #edf1ee; border-radius: 99px; overflow: hidden; margin-top: 10px; }
+    .progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--green), #86a967); border-radius: inherit; }
+    .callout { display: flex; gap: 10px; align-items: center; background: var(--green-light); color: #365b27; border-radius: 13px; padding: 12px; margin: 17px 0; font-size: 12px; line-height: 1.55; }
+    .callout-icon { width: 25px; height: 25px; border-radius: 50%; background: var(--green); color: white; display: grid; place-items: center; flex: 0 0 auto; font-weight: 700; }
+    .form-card { padding: 17px 16px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 13px; font-weight: 650; margin-bottom: 7px; color: #364b58; }
+    .required { color: var(--red); }
+    input, select { width: 100%; height: 43px; border: 1px solid #dce4df; border-radius: 9px; background: #fbfcfa; color: var(--ink); padding: 0 12px; outline: none; transition: .2s; }
+    input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(84,130,53,.1); }
+    .hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    .primary { width: 100%; border: 0; height: 45px; border-radius: 10px; background: var(--blue); color: white; font-weight: 700; box-shadow: 0 5px 12px rgba(31,78,121,.2); }
+    .primary:active { transform: translateY(1px); }
+    .secondary { border: 1px solid #cad9c3; color: var(--green); background: white; border-radius: 8px; padding: 8px 11px; font-size: 12px; }
+    .brand-card { padding: 17px; margin-bottom: 13px; background: linear-gradient(145deg, #fff, #f4f8f1); }
+    .brand-banner { height: 92px; border-radius: 11px; color: white; padding: 15px; background: linear-gradient(115deg, #346d91, #6a9a55); position: relative; overflow: hidden; }
+    .brand-banner::after { content: "禾"; position: absolute; right: 15px; bottom: -22px; font: 100px serif; opacity: .12; }
+    .brand-name { font-size: 20px; font-weight: 800; letter-spacing: 2px; }
+    .brand-sub { font-size: 11px; opacity: .82; margin-top: 5px; }
+    .brand-description { font-size: 12px; line-height: 1.6; color: #52636c; margin: 13px 0; }
+    .condition { border-top: 1px solid var(--line); padding-top: 12px; }
+    .condition-title { font-size: 13px; font-weight: 700; margin-bottom: 9px; }
+    .check-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #55646b; margin: 8px 0; }
+    .check-row input { width: 16px; height: 16px; accent-color: var(--green); }
+    .apply-result { display: none; margin-top: 14px; }
+    .apply-result.show { display: block; }
+    .result-banner { background: #eaf1f8; color: var(--blue); border-radius: 10px; padding: 11px 12px; font-size: 12px; }
+    .certificate { margin-top: 13px; padding: 16px; border: 1px solid #d2dfcf; border-radius: 12px; background: #fbfdf9; position: relative; overflow: hidden; }
+    .certificate::before { content: "已授权"; position: absolute; right: -19px; top: 16px; transform: rotate(35deg); color: rgba(84,130,53,.15); font-size: 27px; font-weight: 900; }
+    .cert-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbdac7; padding-bottom: 11px; }
+    .cert-title { font-size: 15px; font-weight: 800; color: var(--green); }
+    .seal { width: 37px; height: 37px; border: 2px solid var(--green); border-radius: 50%; color: var(--green); display: grid; place-items: center; font-size: 11px; font-weight: 800; transform: rotate(-12deg); }
+    .cert-row { display: flex; justify-content: space-between; font-size: 11px; padding-top: 10px; color: #62716b; }
+    .cert-row strong { color: var(--ink); font-weight: 650; }
+    .profile { display: flex; gap: 12px; align-items: center; padding: 16px; margin-bottom: 18px; }
+    .profile .avatar { width: 48px; height: 48px; background: #e2efdb; border: 0; }
+    .profile-name { font-size: 16px; font-weight: 750; }
+    .profile-type { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .my-section { margin-bottom: 20px; }
+    .course { padding: 13px; margin-bottom: 9px; display: flex; gap: 11px; align-items: center; }
+    .course-icon { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: white; background: var(--green); font-size: 17px; flex: 0 0 auto; }
+    .course-main { flex: 1; min-width: 0; }
+    .course-name { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .course-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; margin-top: 6px; }
+    .course .progress { margin-top: 7px; height: 5px; }
+    .table-card { overflow: hidden; }
+    table { border-collapse: collapse; width: 100%; font-size: 11px; }
+    th { background: #eef4eb; color: #4b653e; font-weight: 700; text-align: left; padding: 11px 10px; }
+    td { padding: 12px 10px; border-top: 1px solid var(--line); color: #58686f; vertical-align: top; }
+    td:nth-child(2) { color: var(--blue); font-weight: 700; }
+    .bottom-nav { position: fixed; bottom: 0; width: 375px; height: 72px; background: rgba(255,255,255,.97); border-top: 1px solid #e2e8e3; display: grid; grid-template-columns: repeat(4,1fr); z-index: 10; padding-bottom: 5px; }
+    .nav-item { border: 0; background: transparent; color: #98a2a5; font-size: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+    .nav-icon { width: 23px; height: 23px; display: grid; place-items: center; font-size: 19px; line-height: 1; }
+    .nav-item.active { color: var(--blue); font-weight: 700; }
+    .nav-item.active .nav-icon { background: #eaf1f8; border-radius: 8px; width: 30px; height: 27px; }
+    .toast { position: fixed; z-index: 20; left: 50%; bottom: 88px; transform: translate(-50%, 12px); opacity: 0; pointer-events: none; background: rgba(32,49,63,.93); color: white; font-size: 12px; padding: 10px 15px; border-radius: 8px; transition: .25s; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @media (min-width: 500px) { .phone { margin: 20px 0; min-height: calc(100vh - 40px); border-radius: 28px; } .bottom-nav { position: absolute; border-radius: 0 0 28px 28px; } }
+  </style>
+</head>
+<body>
+  <main class="phone">
+    <div class="app">
+      <section class="view active" id="homeView">
+        <header class="topbar">
+          <div class="toprow"><div><div class="eyebrow">区域公用品牌运营平台</div><div class="brand">乡品共富</div></div><div class="avatar">李</div></div>
+          <div class="hero-meta"><div class="hero-chip">李家村合作社</div><div class="hero-chip">认证批次 3 个</div></div>
+        </header>
+        <div class="content">
+          <div class="section-head"><div class="section-title">我的产品批次</div><div class="section-note">更新于今天 09:30</div></div>
+          <div id="batchList">
+            <article class="card batch-card"><div class="batch-head"><div><div class="batch-title">高山红脆李</div><div class="batch-id">批次编号：LJ-2026-001</div></div><span class="status green">标准执行良好</span></div><div class="batch-info"><div><span class="metric-label">种植面积</span><span class="metric-value">12.5 亩</span></div><div><span class="metric-label">预计上市</span><span class="metric-value">2026/07/15</span></div></div><div class="progress"><span style="width: 88%"></span></div></article>
+            <article class="card batch-card"><div class="batch-head"><div><div class="batch-title">生态土鸡</div><div class="batch-id">批次编号：LJ-2026-002</div></div><span class="status orange">待品控抽检</span></div><div class="batch-info"><div><span class="metric-label">养殖规模</span><span class="metric-value">1,200 羽</span></div><div><span class="metric-label">预计上市</span><span class="metric-value">2026/08/20</span></div></div><div class="progress"><span style="width: 54%; background: linear-gradient(90deg,#d78b32,#efbd6b)"></span></div></article>
+            <article class="card batch-card"><div class="batch-head"><div><div class="batch-title">山地蜂蜜</div><div class="batch-id">批次编号：LJ-2026-003</div></div><span class="status blue">认证申请中</span></div><div class="batch-info"><div><span class="metric-label">蜂箱数量</span><span class="metric-value">86 箱</span></div><div><span class="metric-label">预计上市</span><span class="metric-value">2026/09/01</span></div></div><div class="progress"><span style="width: 68%; background: linear-gradient(90deg,#1F4E79,#72a2c1)"></span></div></article>
+          </div>
+          <div class="callout"><div class="callout-icon">✓</div><div>坚持按标准生产，完成认证后可申请使用区域公用品牌，产品溢价预计提升 15%～25%。</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="reportView">
+        <header class="topbar"><div class="eyebrow">生产过程管理</div><div class="brand">生产上报</div><div class="hero-meta"><div class="hero-chip">让每一批好产品都有迹可循</div></div></header>
+        <div class="content"><div class="section-head"><div class="section-title">新增生产批次</div><div class="section-note">第 1 步 · 信息填报</div></div>
+          <div class="card form-card"><form id="reportForm">
+            <div class="form-group"><label>地块 / 养殖场 <span class="required">*</span></label><input id="plot" required placeholder="例如：李家村东坡 3 号地块" /></div>
+            <div class="form-group"><label>作物 / 产品品类 <span class="required">*</span></label><select id="crop" required><option value="">请选择品类</option><option>高山红脆李</option><option>生态土鸡</option><option>山地蜂蜜</option><option>其他特色农产品</option></select></div>
+            <div class="form-group"><label>种植面积 / 养殖规模 <span class="required">*</span></label><input id="area" required placeholder="例如：12.5 亩 / 1200 羽" /></div>
+            <div class="form-group"><label>预计上市时间 <span class="required">*</span></label><input id="date" type="date" required value="2026-08-20" /><div class="hint">平台将据此安排品控抽检与上市指导</div></div>
+            <button class="primary" type="submit">提交生产上报</button>
+          </form></div>
+          <div class="callout" style="margin-top:14px"><div class="callout-icon">i</div><div>提交后，品控人员将在 3 个工作日内联系您安排现场抽检。</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="brandView">
+        <header class="topbar"><div class="eyebrow">品牌资产管理</div><div class="brand">品牌授权</div><div class="hero-meta"><div class="hero-chip">统一标准 · 统一品质 · 统一品牌</div></div></header>
+        <div class="content"><div class="section-head"><div class="section-title">可申请品牌</div><div class="section-note">1 个可申请</div></div>
+          <div class="card brand-card"><div class="brand-banner"><div class="brand-name">青山好物</div><div class="brand-sub">本地特色农产品区域公用品牌</div></div><div class="brand-description">以青山生态为背书，汇聚本地优质农产品，助力农户共享品牌价值与市场增量。</div><div class="condition"><div class="condition-title">授权条件核对</div>
+              <label class="check-row"><input type="checkbox" checked /> 已完成平台生产信息上报</label><label class="check-row"><input type="checkbox" checked /> 接受区域品牌质量标准</label><label class="check-row"><input type="checkbox" checked /> 同意接受品控抽检与培训</label><label class="check-row"><input type="checkbox" checked /> 承诺不销售不合格产品</label>
+            </div><button class="primary" id="applyBtn" style="margin-top:14px">一键提交授权申请</button>
+            <div class="apply-result" id="applyResult"><div class="result-banner">✓ 申请已提交，当前状态：<strong>审核中</strong><br><span style="opacity:.8">预计 2 个工作日内完成审核</span></div><div class="certificate"><div class="cert-top"><div class="cert-title">区域公用品牌电子授权证书</div><div class="seal">青山<br>好物</div></div><div class="cert-row"><span>授权主体</span><strong>李家村合作社</strong></div><div class="cert-row"><span>授权品类</span><strong id="certCrop">高山红脆李等</strong></div><div class="cert-row"><span>证书编号</span><strong>QSHW-2026-0088</strong></div><div class="cert-row"><span>有效期</span><strong>审核通过后一年</strong></div></div></div>
+          </div>
+          <div class="callout"><div class="callout-icon">★</div><div>获得授权后，可在包装、店铺和宣传物料中规范使用“青山好物”品牌标识。</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="meView">
+        <header class="topbar"><div class="eyebrow">我的经营服务</div><div class="brand">我的</div><div class="hero-meta"><div class="hero-chip">共富同行 · 一起把产品卖得更好</div></div></header>
+        <div class="content"><div class="card profile"><div class="avatar">李</div><div><div class="profile-name">李家村合作社</div><div class="profile-type">合作社 · 已实名 · 品牌申请中</div></div><div style="margin-left:auto;color:#9aa5a8;font-size:20px">›</div></div>
+          <div class="my-section"><div class="section-head"><div class="section-title">技能培训</div><div class="section-note">学习提升品牌竞争力</div></div>
+            <div class="card course"><div class="course-icon">▦</div><div class="course-main"><div class="course-name">区域品牌标准与品控入门</div><div class="course-meta"><span>已完成 3 / 5 节</span><span>60%</span></div><div class="progress"><span style="width:60%"></span></div></div><div style="color:#9aa5a8;font-size:18px">›</div></div>
+            <div class="card course"><div class="course-icon" style="background:var(--blue)">↗</div><div class="course-main"><div class="course-name">短视频带货与农产品营销</div><div class="course-meta"><span>已完成 1 / 4 节</span><span>25%</span></div><div class="progress"><span style="width:25%;background:linear-gradient(90deg,var(--blue),#72a2c1)"></span></div></div><div style="color:#9aa5a8;font-size:18px">›</div></div>
+          </div>
+          <div class="my-section"><div class="section-head"><div class="section-title">收益分配记录</div><div class="section-note">近 3 个月</div></div><div class="card table-card"><table><thead><tr><th>批次</th><th>结算金额</th><th>分配依据</th></tr></thead><tbody><tr><td>红脆李<br><span style="color:#9aa5a8">LJ-001</span></td><td>¥ 8,640</td><td>按销量<br>+品质等级</td></tr><tr><td>土鸡<br><span style="color:#9aa5a8">LJ-002</span></td><td>¥ 5,280</td><td>保底价<br>+销售分成</td></tr><tr><td>蜂蜜<br><span style="color:#9aa5a8">LJ-003</span></td><td>¥ 3,960</td><td>按交付量<br>+品牌溢价</td></tr></tbody></table></div></div>
+        </div>
+      </section>
+    </div>
+    <nav class="bottom-nav"><button class="nav-item active" data-view="homeView"><span class="nav-icon">⌂</span><span>首页</span></button><button class="nav-item" data-view="reportView"><span class="nav-icon">＋</span><span>生产上报</span></button><button class="nav-item" data-view="brandView"><span class="nav-icon">♢</span><span>品牌授权</span></button><button class="nav-item" data-view="meView"><span class="nav-icon">◎</span><span>我的</span></button></nav>
+    <div class="toast" id="toast"></div>
+  </main>
+  <script>
+    const navItems = document.querySelectorAll('.nav-item');
+    const views = document.querySelectorAll('.view');
+    navItems.forEach(item => item.addEventListener('click', () => {
+      const id = item.dataset.view;
+      navItems.forEach(n => n.classList.toggle('active', n === item));
+      views.forEach(v => v.classList.toggle('active', v.id === id));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }));
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message; toast.classList.add('show');
+      clearTimeout(window.toastTimer); window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
+    }
+
+    document.getElementById('reportForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const crop = document.getElementById('crop').value || '新产品';
+      const area = document.getElementById('area').value || '待补充';
+      const item = document.createElement('article');
+      item.className = 'card batch-card';
+      item.innerHTML = `<div class="batch-head"><div><div class="batch-title">${crop}</div><div class="batch-id">批次编号：LJ-2026-${String(Date.now()).slice(-3)}</div></div><span class="status orange">待品控抽检</span></div><div class="batch-info"><div><span class="metric-label">种植面积 / 规模</span><span class="metric-value">${area}</span></div><div><span class="metric-label">当前状态</span><span class="metric-value">信息已上报</span></div></div><div class="progress"><span style="width: 35%; background: linear-gradient(90deg,#d78b32,#efbd6b)"></span></div>`;
+      document.getElementById('batchList').prepend(item);
+      document.getElementById('reportForm').reset();
+      showToast('生产上报成功，当前状态：待品控抽检');
+      navItems[0].click();
+    });
+
+    document.getElementById('applyBtn').addEventListener('click', () => {
+      const unchecked = [...document.querySelectorAll('.check-row input')].some(input => !input.checked);
+      if (unchecked) { showToast('请先完成全部授权条件核对'); return; }
+      document.getElementById('applyResult').classList.add('show');
+      document.getElementById('applyBtn').textContent = '已提交申请';
+      document.getElementById('applyBtn').disabled = true;
+      document.getElementById('applyBtn').style.opacity = '.65';
+      showToast('品牌授权申请已提交');
+    });
+  </script>
+</body>
+</html>

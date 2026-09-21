@@ -1,0 +1,316 @@
+openapi: 3.0.3
+info:
+  title: 区域公用品牌标准化运营与助农增收平台 API
+  version: 1.0.0
+  description: RESTful API 初版骨架，覆盖标准化、品牌授权、协同服务和数字化运营。
+servers:
+  - url: https://api.example.com/api/v1
+    description: 生产环境示例
+tags:
+  - name: M1-标准化管理
+  - name: M2-品牌授权管理
+  - name: M3-协同服务
+  - name: M4-数字化运营
+security:
+  - oauth2: [openid]
+paths:
+  /subjects:
+    post:
+      tags: [M2-品牌授权管理]
+      summary: 创建生产主体入驻申请
+      security: [{oauth2: [openid]}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/SubjectCreateRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+    get:
+      tags: [M2-品牌授权管理]
+      summary: 查询生产主体
+      security: [{oauth2: [openid]}]
+      parameters:
+        - {$ref: '#/components/parameters/Keyword'}
+        - {name: status, in: query, schema: {type: string}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/PageSize'}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /subjects/{subjectId}:
+    get:
+      tags: [M2-品牌授权管理]
+      summary: 查询主体详情
+      parameters: [{name: subjectId, in: path, required: true, schema: {type: string}}]
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /batches:
+    post:
+      tags: [M1-标准化管理]
+      summary: 创建产品批次
+      security: [{oauth2: [openid]}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/BatchCreateRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+    get:
+      tags: [M1-标准化管理]
+      summary: 查询产品批次
+      parameters:
+        - {name: subjectId, in: query, schema: {type: string}}
+        - {name: category, in: query, schema: {type: string}}
+        - {name: status, in: query, schema: {type: string}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/PageSize'}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /batches/{batchId}:
+    get:
+      tags: [M1-标准化管理]
+      summary: 查询批次详情
+      parameters: [{name: batchId, in: path, required: true, schema: {type: string}}]
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /standards:
+    post:
+      tags: [M1-标准化管理]
+      summary: 创建标准库版本
+      security: [{oauth2: ['standard:write']}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/StandardCreateRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+    get:
+      tags: [M1-标准化管理]
+      summary: 查询标准库
+      parameters:
+        - {$ref: '#/components/parameters/Keyword'}
+        - {name: category, in: query, schema: {type: string}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/PageSize'}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /batches/{batchId}/quality-inspections:
+    post:
+      tags: [M1-标准化管理]
+      summary: 提交产品批次品控检查
+      security: [{oauth2: ['quality:write']}]
+      parameters: [{name: batchId, in: path, required: true, schema: {type: string}}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/QualityInspectionRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /packaging-logistics-standards:
+    get:
+      tags: [M1-标准化管理]
+      summary: 查询包装与流通规范
+      parameters: [{name: productCategory, in: query, schema: {type: string}}, {name: regionCode, in: query, schema: {type: string}}, {name: transportMode, in: query, schema: {type: string}}, {$ref: '#/components/parameters/Page'}, {$ref: '#/components/parameters/PageSize'}]
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /subjects/{subjectId}/qualification-reviews:
+    post:
+      tags: [M2-品牌授权管理]
+      summary: 提交主体资质审核
+      security: [{oauth2: [openid]}]
+      parameters: [{name: subjectId, in: path, required: true, schema: {type: string}}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/QualificationReviewRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /brand-authorizations:
+    post:
+      tags: [M2-品牌授权管理]
+      summary: 申请品牌授权
+      security: [{oauth2: ['brand:apply']}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/BrandAuthorizationRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /brand-authorizations/{authorizationId}/review:
+    put:
+      tags: [M2-品牌授权管理]
+      summary: 审批品牌授权
+      security: [{oauth2: ['brand:review']}]
+      parameters: [{name: authorizationId, in: path, required: true, schema: {type: string}}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/ReviewRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /brands/{brandId}/visual-assets:
+    post:
+      tags: [M2-品牌授权管理]
+      summary: 上传 VI 品牌素材
+      parameters: [{name: brandId, in: path, required: true, schema: {type: string}}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/VisualAssetRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /quality-service-orders:
+    post:
+      tags: [M3-协同服务]
+      summary: 创建品控服务工单
+      security: [{oauth2: ['quality:write']}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/QualityOrderRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /channel-matches:
+    post:
+      tags: [M3-协同服务]
+      summary: 发布渠道撮合需求
+      security: [{oauth2: ['channel:match:create']}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/ChannelMatchRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /training-records:
+    post:
+      tags: [M3-协同服务]
+      summary: 提交培训报名记录
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/TrainingRecordRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /settlements:
+    post:
+      tags: [M3-协同服务]
+      summary: 生成利益分配结算单
+      security: [{oauth2: ['settlement:create']}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/SettlementRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /marketing-campaigns:
+    post:
+      tags: [M4-数字化运营]
+      summary: 创建电商营销活动
+      security: [{oauth2: ['marketing:campaign:create']}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/MarketingCampaignRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /agri-tourism-projects:
+    post:
+      tags: [M4-数字化运营]
+      summary: 创建农旅项目
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/AgriTourismRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /cultural-contents:
+    post:
+      tags: [M4-数字化运营]
+      summary: 创建文化赋能内容
+      security: [{oauth2: ['content:write']}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/CulturalContentRequest'}}}
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /traceability/{traceCode}:
+    get:
+      tags: [M4-数字化运营]
+      summary: 查询消费者溯源信息
+      security: []
+      parameters: [{name: traceCode, in: path, required: true, schema: {type: string}}]
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+  /batches/{batchId}/trace-code:
+    post:
+      tags: [M4-数字化运营]
+      summary: 为批次生成一批一码溯源码
+      security: [{oauth2: [openid]}]
+      parameters: [{name: batchId, in: path, required: true, schema: {type: string}}]
+      responses: {'200': {$ref: '#/components/responses/Success'}}
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/oauth/authorize
+          tokenUrl: https://auth.example.com/oauth/token
+          scopes:
+            openid: 基础身份信息
+            standard:read: 查看标准库
+            standard:write: 管理标准库
+            quality:write: 管理品控
+            brand:apply: 申请品牌授权
+            brand:review: 审批品牌授权
+            channel:match:create: 创建渠道撮合需求
+            settlement:create: 创建结算单
+            marketing:campaign:create: 创建营销活动
+            content:write: 管理内容
+  parameters:
+    Keyword: {name: keyword, in: query, schema: {type: string}}
+    Page: {name: page, in: query, schema: {type: integer, default: 1, minimum: 1}}
+    PageSize: {name: pageSize, in: query, schema: {type: integer, default: 20, maximum: 100}}
+  responses:
+    Success:
+      description: 操作成功
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiResponse'}
+    Error:
+      description: 业务错误
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErrorResponse'}
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        code: {type: string, example: SUCCESS}
+        message: {type: string, example: 操作成功}
+        requestId: {type: string, example: req_202609180001}
+        data: {type: object}
+        timestamp: {type: string, format: date-time}
+    ErrorResponse:
+      type: object
+      properties:
+        code: {type: string, example: PARAM_INVALID}
+        message: {type: string, example: 请求参数校验失败}
+        requestId: {type: string}
+        data: {type: object}
+        timestamp: {type: string, format: date-time}
+    StandardCreateRequest:
+      type: object
+      required: [name, category, version]
+      properties:
+        name: {type: string}
+        category: {type: string, enum: [PRODUCT, PACKAGING, LOGISTICS]}
+        applicableRegion: {type: string}
+        productCategory: {type: string}
+        version: {type: string}
+        effectiveDate: {type: string, format: date}
+        description: {type: string}
+        clauses: {type: array, items: {type: object}}
+    SubjectCreateRequest:
+      type: object
+      required: [subjectType, subjectName]
+      properties:
+        subjectType: {type: string, enum: [FARMER, COOPERATIVE, PROCESSOR]}
+        subjectName: {type: string}
+        contactPhone: {type: string}
+        contactPerson: {type: string}
+    BatchCreateRequest:
+      type: object
+      required: [subjectId, category, expectedListingDate]
+      properties:
+        subjectId: {type: string}
+        batchCode: {type: string}
+        category: {type: string}
+        standardId: {type: string}
+        plantingArea: {type: number, minimum: 0}
+        expectedListingDate: {type: string, format: date}
+    QualityInspectionRequest:
+      type: object
+      required: [inspectionType, standardId, result]
+      properties:
+        inspectionType: {type: string}
+        standardId: {type: string}
+        inspectorId: {type: string}
+        inspectionDate: {type: string, format: date}
+        result: {type: string, enum: [PASS, FAIL]}
+        items: {type: array, items: {type: object}}
+        reportFileUrl: {type: string, format: uri}
+    QualificationReviewRequest: {type: object, properties: {subjectType: {type: string}, legalName: {type: string}, unifiedSocialCreditCode: {type: string}, contactName: {type: string}, contactPhone: {type: string}, qualificationFiles: {type: array, items: {type: object}}, realNameVerified: {type: boolean}, enterpriseVerified: {type: boolean}}}
+    BrandAuthorizationRequest: {type: object, required: [subjectId, brandId], properties: {subjectId: {type: string}, brandId: {type: string}, authorizedProducts: {type: array, items: {type: object}}, authorizationScope: {type: string}, startDate: {type: string, format: date}, endDate: {type: string, format: date}, salesChannels: {type: array, items: {type: string}}}}
+    ReviewRequest: {type: object, required: [action], properties: {action: {type: string, enum: [APPROVE, REJECT]}, reviewComment: {type: string}, authorizedQuota: {type: number}, authorizationCertificateUrl: {type: string, format: uri}}}
+    VisualAssetRequest: {type: object, required: [assetType, name, fileUrl], properties: {assetType: {type: string}, name: {type: string}, version: {type: string}, fileUrl: {type: string, format: uri}, applicableScenes: {type: array, items: {type: string}}, description: {type: string}}}
+    QualityOrderRequest: {type: object, required: [subjectId, batchId, serviceType], properties: {subjectId: {type: string}, batchId: {type: string}, serviceType: {type: string}, priority: {type: string}, expectedDate: {type: string, format: date}, address: {type: string}, requirements: {type: string}}}
+    ChannelMatchRequest: {type: object, required: [matchType, productCategory, quantity], properties: {matchType: {type: string}, subjectId: {type: string}, productCategory: {type: string}, quantity: {type: number}, unit: {type: string}, targetPrice: {type: number}, deliveryRegion: {type: string}, deliveryDate: {type: string, format: date}, certifications: {type: array, items: {type: string}}, description: {type: string}}}
+    TrainingRecordRequest: {type: object, required: [trainingId, subjectId, participantName], properties: {trainingId: {type: string}, subjectId: {type: string}, participantName: {type: string}, participantPhone: {type: string}, role: {type: string}, attendanceStatus: {type: string}}}
+    SettlementRequest: {type: object, required: [orderId, settlementPeriod, participants, totalAmount], properties: {orderId: {type: string}, settlementPeriod: {type: string}, participants: {type: array, items: {type: object}}, totalAmount: {type: number}, currency: {type: string}, remark: {type: string}}}
+    MarketingCampaignRequest: {type: object, required: [name, campaignType, brandId], properties: {name: {type: string}, campaignType: {type: string}, brandId: {type: string}, productIds: {type: array, items: {type: string}}, startTime: {type: string, format: date-time}, endTime: {type: string, format: date-time}, budget: {type: number}, targetSalesAmount: {type: number}, channels: {type: array, items: {type: string}}}}
+    AgriTourismRequest: {type: object, required: [name, subjectId, projectType], properties: {name: {type: string}, subjectId: {type: string}, projectType: {type: string}, address: {type: string}, capacity: {type: integer}, ticketPrice: {type: number}, openDate: {type: string, format: date}, closeDate: {type: string, format: date}, description: {type: string}}}
+    CulturalContentRequest: {type: object, required: [title, contentType, contentUrl], properties: {title: {type: string}, contentType: {type: string}, brandId: {type: string}, regionCode: {type: string}, coverUrl: {type: string, format: uri}, contentUrl: {type: string, format: uri}, tags: {type: array, items: {type: string}}, publishStatus: {type: string}}}
