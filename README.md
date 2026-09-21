@@ -26,8 +26,18 @@ docker-compose up -d --build
 # API 地址
 #   接口文档: http://127.0.0.1:8010/docs
 #   健康检查: http://127.0.0.1:8010/api/health
+#   政府大屏: http://127.0.0.1:8010/bigscreen/  (随 API 容器发布,公开访问,每分钟刷新)
 # MySQL(宿主机调试): 127.0.0.1:3307  root / danqiu_dev_root(可用 .env 覆盖)
 ```
+
+前端两个应用(H5 与管理后台):
+
+```bash
+cd frontend  && npm run dev   # http://localhost:5173  农户端/消费端 H5
+cd admin-web && npm run dev   # http://localhost:5174  银行/保险/运营/管理后台
+```
+
+> 大屏说明:PRD 指定高德地图 JS API,但其需要申请 Key;当前版本用 ECharts 直接渲染地块 GeoJSON 边界(415 块地按认证状态着色、开放认养紫描边),零外部依赖离线可用,后续有 Key 可叠加高德瓦片。
 
 常用命令:
 

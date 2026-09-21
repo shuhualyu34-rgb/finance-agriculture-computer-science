@@ -1,6 +1,6 @@
 # PRD 验收标准对照表(§九)
 
-> 更新时间:阶段 1 完成(后端写入闭环 + 农户端/消费端 H5)
+> 更新时间:阶段 2(后端 + 政府大屏完成;银行/保险/运营/管理 Web 界面开发中)
 
 | # | PRD 验收标准 | 状态 | 实现位置 | 验证方式 |
 |---|---|---|---|---|
@@ -10,7 +10,7 @@
 | 4 | 消费者可认养一块田 | ✅ | GET /api/adoption/plots + POST /api/adoption/orders(模拟支付即 PAID)+ GET /api/my/adoptions 我的认养 | pytest test_consumer_adoption |
 | 5 | 农户可申请贷款,系统生成建议,银行自行审批 | ✅ | POST /api/my/loans(面积×800 建议 + 风险评级)+ PUT /api/bank/loans/{id}/review | pytest test_loan_apply_and_bank_review |
 | 6 | 管理员可录入受灾情况触发理赔,保险公司复核 | ✅ | POST /api/insurance/claims(赔付=保额×受灾比例)+ PUT /claims/{id}/review | pytest test_claim_flow |
-| 7 | 政府大屏数字随后台更新 | ✅ 数据源 | GET /api/dashboard/summary + /api/government/summary 实时聚合 | 大屏页面阶段 2 接入 |
+| 7 | 政府大屏数字随后台更新 | ✅ | bigscreen/ 随 API 发布(http://127.0.0.1:8010/bigscreen/):17 项指标卡片实时聚合、415 块地边界地图(认证着色/认养描边)、业务动态滚动,每分钟自动刷新 | GET /api/government/dashboard + 页面实测 |
 
 ## PRD 业务规则一致性(§六)
 
