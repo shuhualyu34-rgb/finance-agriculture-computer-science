@@ -1,0 +1,56 @@
+name: danqiu
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: danqiu-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-danqiu_dev_root}
+      MYSQL_DATABASE: danqiu_rice
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    volumes:
+      - danqiu-mysql-data:/var/lib/mysql
+      # 首次启动自动建库导数据(按文件名顺序执行)
+      - ./danqiu_platform_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./danqiu_rice_seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    ports:
+      - "127.0.0.1:3307:3306"   # 宿主机 3307 -> 容器 3306,便于本地调试
+
+  api:
+    build:
+      context: .
+      args:
+        BASE_IMAGE: ${BASE_IMAGE:-python:3.12-slim}
+    container_name: danqiu-api
+    restart: unless-stopped
+    environment:
+      DANQIU_DB_HOST: db
+      DANQIU_DB_PORT: "3306"
+      DANQIU_DB_USER: root
+      DANQIU_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-danqiu_dev_root}
+      DANQIU_DB_NAME: danqiu_rice
+      TZ: Asia/Shanghai
+    ports:
+      - "127.0.0.1:8010:8010"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+volumes:
+  danqiu-mysql-data:

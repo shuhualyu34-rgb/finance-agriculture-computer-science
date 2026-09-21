@@ -8,7 +8,6 @@ import pymysql
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-
 DB_CONFIG = {
     "host": os.getenv("DANQIU_DB_HOST", "127.0.0.1"),
     "port": int(os.getenv("DANQIU_DB_PORT", "3306")),
@@ -67,7 +66,8 @@ def dashboard_summary() -> dict[str, Any]:
           (SELECT COUNT(*) FROM loan_application) AS loan_applications,
           (SELECT COUNT(*) FROM adoption_order WHERE status IN ('PAID','ACTIVE')) AS active_adoptions,
           (SELECT COUNT(*) FROM sales_order WHERE status <> 'CANCELLED') AS orders,
-          (SELECT COALESCE(SUM(total_amount), 0) FROM sales_order WHERE source = 'PLATFORM' AND status <> 'CANCELLED') AS sales_amount,
+          (SELECT COALESCE(SUM(total_amount), 0) FROM sales_order
+             WHERE source = 'PLATFORM' AND status <> 'CANCELLED') AS sales_amount,
           (SELECT COALESCE(SUM(dividend_amount), 0) FROM farmer_dividend WHERE status <> 'SETTLED') AS pending_dividend
         """
     )

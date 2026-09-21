@@ -15,13 +15,13 @@ CREATE TABLE sys_user (
   status ENUM('ACTIVE','DISABLED') NOT NULL DEFAULT 'ACTIVE',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB COMMENT='平台用户';
+) ENGINE=InnoDB COMMENT '平台用户';
 
 CREATE TABLE sys_role (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   role_code VARCHAR(32) NOT NULL UNIQUE,
   role_name VARCHAR(64) NOT NULL
-) ENGINE=InnoDB COMMENT='平台角色';
+) ENGINE=InnoDB COMMENT '平台角色';
 
 CREATE TABLE sys_user_role (
   user_id BIGINT UNSIGNED NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE sys_user_role (
   PRIMARY KEY (user_id, role_id),
   CONSTRAINT fk_sur_user FOREIGN KEY (user_id) REFERENCES sys_user(id),
   CONSTRAINT fk_sur_role FOREIGN KEY (role_id) REFERENCES sys_role(id)
-) ENGINE=InnoDB COMMENT='用户角色关系';
+) ENGINE=InnoDB COMMENT '用户角色关系';
 
 -- 2. 农户、地块与生产档案
 CREATE TABLE farmer_profile (
@@ -37,12 +37,12 @@ CREATE TABLE farmer_profile (
   user_id BIGINT UNSIGNED NOT NULL UNIQUE,
   village VARCHAR(128) NOT NULL DEFAULT '丹邱村',
   address VARCHAR(255) NULL,
-  id_card_masked VARCHAR(32) NULL COMMENT='仅保存脱敏身份证号',
+  id_card_masked VARCHAR(32) NULL COMMENT '仅保存脱敏身份证号',
   certification_status ENUM('PENDING','CERTIFIED','REJECTED','SUSPENDED') NOT NULL DEFAULT 'PENDING',
   certification_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_farmer_user FOREIGN KEY (user_id) REFERENCES sys_user(id)
-) ENGINE=InnoDB COMMENT='农户档案';
+) ENGINE=InnoDB COMMENT '农户档案';
 
 CREATE TABLE farm_plot (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -54,13 +54,13 @@ CREATE TABLE farm_plot (
   variety VARCHAR(128) NOT NULL DEFAULT '增科新选丝苗1号',
   longitude DECIMAL(10,7) NULL,
   latitude DECIMAL(10,7) NULL,
-  boundary_json JSON NULL COMMENT='地块边界，前端地图展示用',
-  satellite_image_url VARCHAR(500) NULL COMMENT='静态卫星图地址',
+  boundary_json JSON NULL COMMENT '地块边界，前端地图展示用',
+  satellite_image_url VARCHAR(500) NULL COMMENT '静态卫星图地址',
   status ENUM('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_plot_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profile(id),
   CONSTRAINT chk_plot_area CHECK (area_mu > 0)
-) ENGINE=InnoDB COMMENT='农田地块';
+) ENGINE=InnoDB COMMENT '农田地块';
 
 CREATE TABLE production_season (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -69,7 +69,7 @@ CREATE TABLE production_season (
   sowing_date DATE NULL,
   harvest_date DATE NULL,
   status ENUM('PLANNED','IN_PROGRESS','HARVESTED','CLOSED') NOT NULL DEFAULT 'PLANNED'
-) ENGINE=InnoDB COMMENT='种植季';
+) ENGINE=InnoDB COMMENT '种植季';
 
 CREATE TABLE farm_record (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -89,7 +89,7 @@ CREATE TABLE farm_record (
   CONSTRAINT fk_record_user FOREIGN KEY (submitted_by) REFERENCES sys_user(id),
   KEY idx_record_plot_date (plot_id, record_date),
   KEY idx_record_type (record_type)
-) ENGINE=InnoDB COMMENT='农事记录';
+) ENGINE=InnoDB COMMENT '农事记录';
 
 CREATE TABLE record_attachment (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -98,7 +98,7 @@ CREATE TABLE record_attachment (
   file_type VARCHAR(32) NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_attachment_record FOREIGN KEY (record_id) REFERENCES farm_record(id) ON DELETE CASCADE
-) ENGINE=InnoDB COMMENT='农事记录照片或检测报告';
+) ENGINE=InnoDB COMMENT '农事记录照片或检测报告';
 
 -- 3. 标准、认证与监管
 CREATE TABLE standard_version (
@@ -108,7 +108,7 @@ CREATE TABLE standard_version (
   status ENUM('DRAFT','PUBLISHED','RETIRED') NOT NULL DEFAULT 'DRAFT',
   published_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB COMMENT='丹邱丝苗米标准版本';
+) ENGINE=InnoDB COMMENT '丹邱丝苗米标准版本';
 
 CREATE TABLE standard_clause (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -120,7 +120,7 @@ CREATE TABLE standard_clause (
   check_rule_json JSON NULL,
   UNIQUE KEY uk_clause_code (standard_id, clause_code),
   CONSTRAINT fk_clause_standard FOREIGN KEY (standard_id) REFERENCES standard_version(id) ON DELETE CASCADE
-) ENGINE=InnoDB COMMENT='全链条标准条款';
+) ENGINE=InnoDB COMMENT '全链条标准条款';
 
 CREATE TABLE farmer_certification (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -136,7 +136,7 @@ CREATE TABLE farmer_certification (
   CONSTRAINT fk_cert_plot FOREIGN KEY (plot_id) REFERENCES farm_plot(id),
   CONSTRAINT fk_cert_standard FOREIGN KEY (standard_id) REFERENCES standard_version(id),
   CONSTRAINT fk_cert_reviewer FOREIGN KEY (reviewer_id) REFERENCES sys_user(id)
-) ENGINE=InnoDB COMMENT='农户地块品牌认证';
+) ENGINE=InnoDB COMMENT '农户地块品牌认证';
 
 CREATE TABLE certification_check (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -146,7 +146,7 @@ CREATE TABLE certification_check (
   note VARCHAR(500) NULL,
   CONSTRAINT fk_check_cert FOREIGN KEY (certification_id) REFERENCES farmer_certification(id) ON DELETE CASCADE,
   CONSTRAINT fk_check_clause FOREIGN KEY (clause_id) REFERENCES standard_clause(id)
-) ENGINE=InnoDB COMMENT='认证逐项检查结果';
+) ENGINE=InnoDB COMMENT '认证逐项检查结果';
 
 CREATE TABLE field_inspection (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -159,7 +159,7 @@ CREATE TABLE field_inspection (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_inspection_plot FOREIGN KEY (plot_id) REFERENCES farm_plot(id),
   CONSTRAINT fk_inspection_user FOREIGN KEY (inspector_id) REFERENCES sys_user(id)
-) ENGINE=InnoDB COMMENT='政府实地核验记录';
+) ENGINE=InnoDB COMMENT '政府实地核验记录';
 
 CREATE TABLE regulatory_report (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -173,7 +173,7 @@ CREATE TABLE regulatory_report (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uk_report_period (report_type, report_period),
   CONSTRAINT fk_reg_report_user FOREIGN KEY (confirmed_by) REFERENCES sys_user(id)
-) ENGINE=InnoDB COMMENT='政府周期监管报表';
+) ENGINE=InnoDB COMMENT '政府周期监管报表';
 
 -- 4. 保险与贷款
 CREATE TABLE insurance_product (
@@ -183,7 +183,7 @@ CREATE TABLE insurance_product (
   premium_rate DECIMAL(6,4) NOT NULL DEFAULT 0.0500,
   government_subsidy_rate DECIMAL(6,4) NOT NULL DEFAULT 0.8000,
   status ENUM('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE'
-) ENGINE=InnoDB COMMENT='农业保险产品';
+) ENGINE=InnoDB COMMENT '农业保险产品';
 
 CREATE TABLE insurance_policy (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -200,7 +200,7 @@ CREATE TABLE insurance_policy (
   CONSTRAINT fk_policy_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profile(id),
   CONSTRAINT fk_policy_plot FOREIGN KEY (plot_id) REFERENCES farm_plot(id),
   CONSTRAINT fk_policy_product FOREIGN KEY (product_id) REFERENCES insurance_product(id)
-) ENGINE=InnoDB COMMENT='农户保单';
+) ENGINE=InnoDB COMMENT '农户保单';
 
 CREATE TABLE insurance_claim (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -209,7 +209,7 @@ CREATE TABLE insurance_claim (
   disaster_note TEXT NULL,
   disaster_rate DECIMAL(6,4) NOT NULL,
   claim_amount DECIMAL(12,2) NOT NULL,
-  entered_by BIGINT UNSIGNED NOT NULL COMMENT='管理员手动录入受灾比例',
+  entered_by BIGINT UNSIGNED NOT NULL COMMENT '管理员手动录入受灾比例',
   reviewed_by BIGINT UNSIGNED NULL,
   status ENUM('SUBMITTED','UNDER_REVIEW','APPROVED','REJECTED','PAID') NOT NULL DEFAULT 'SUBMITTED',
   reviewed_at DATETIME NULL,
@@ -217,7 +217,7 @@ CREATE TABLE insurance_claim (
   CONSTRAINT fk_claim_entered FOREIGN KEY (entered_by) REFERENCES sys_user(id),
   CONSTRAINT fk_claim_reviewer FOREIGN KEY (reviewed_by) REFERENCES sys_user(id),
   CONSTRAINT chk_disaster_rate CHECK (disaster_rate >= 0 AND disaster_rate <= 1)
-) ENGINE=InnoDB COMMENT='保险理赔';
+) ENGINE=InnoDB COMMENT '保险理赔';
 
 CREATE TABLE loan_application (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -233,7 +233,7 @@ CREATE TABLE loan_application (
   reviewed_at DATETIME NULL,
   CONSTRAINT fk_loan_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profile(id),
   CONSTRAINT fk_loan_plot FOREIGN KEY (plot_id) REFERENCES farm_plot(id)
-) ENGINE=InnoDB COMMENT='贷款申请与授信建议';
+) ENGINE=InnoDB COMMENT '贷款申请与授信建议';
 
 -- 5. 溯源、商城、认养与分红
 CREATE TABLE trace_code (
@@ -248,7 +248,7 @@ CREATE TABLE trace_code (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_trace_plot FOREIGN KEY (plot_id) REFERENCES farm_plot(id),
   CONSTRAINT fk_trace_season FOREIGN KEY (season_id) REFERENCES production_season(id)
-) ENGINE=InnoDB COMMENT='一批一码溯源码';
+) ENGINE=InnoDB COMMENT '一批一码溯源码';
 
 CREATE TABLE product (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -260,7 +260,7 @@ CREATE TABLE product (
   status ENUM('ON_SALE','OFF_SALE') NOT NULL DEFAULT 'ON_SALE',
   CONSTRAINT fk_product_trace FOREIGN KEY (trace_code_id) REFERENCES trace_code(id),
   CONSTRAINT chk_product_price CHECK (price >= 0)
-) ENGINE=InnoDB COMMENT='平台销售商品';
+) ENGINE=InnoDB COMMENT '平台销售商品';
 
 CREATE TABLE adoption_order (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -272,7 +272,7 @@ CREATE TABLE adoption_order (
   started_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_adoption_user FOREIGN KEY (consumer_user_id) REFERENCES sys_user(id),
   CONSTRAINT fk_adoption_plot FOREIGN KEY (plot_id) REFERENCES farm_plot(id)
-) ENGINE=InnoDB COMMENT='消费者认养订单';
+) ENGINE=InnoDB COMMENT '消费者认养订单';
 
 CREATE TABLE sales_order (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -287,7 +287,7 @@ CREATE TABLE sales_order (
   completed_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_sales_user FOREIGN KEY (consumer_user_id) REFERENCES sys_user(id)
-) ENGINE=InnoDB COMMENT='平台商城订单';
+) ENGINE=InnoDB COMMENT '平台商城订单';
 
 CREATE TABLE sales_order_item (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -300,7 +300,7 @@ CREATE TABLE sales_order_item (
   CONSTRAINT fk_item_order FOREIGN KEY (order_id) REFERENCES sales_order(id) ON DELETE CASCADE,
   CONSTRAINT fk_item_product FOREIGN KEY (product_id) REFERENCES product(id),
   CONSTRAINT fk_item_plot FOREIGN KEY (plot_id) REFERENCES farm_plot(id)
-) ENGINE=InnoDB COMMENT='商城订单明细';
+) ENGINE=InnoDB COMMENT '商城订单明细';
 
 CREATE TABLE shipment (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -309,14 +309,14 @@ CREATE TABLE shipment (
   tracking_no VARCHAR(128) NULL,
   shipped_at DATETIME NULL,
   CONSTRAINT fk_shipment_order FOREIGN KEY (order_id) REFERENCES sales_order(id)
-) ENGINE=InnoDB COMMENT='订单物流';
+) ENGINE=InnoDB COMMENT '订单物流';
 
 CREATE TABLE farmer_dividend (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   order_id BIGINT UNSIGNED NOT NULL,
   farmer_id BIGINT UNSIGNED NOT NULL,
   plot_id BIGINT UNSIGNED NOT NULL,
-  base_amount DECIMAL(12,2) NOT NULL COMMENT='参与分红的订单金额或新增利润基数',
+  base_amount DECIMAL(12,2) NOT NULL COMMENT '参与分红的订单金额或新增利润基数',
   dividend_rate DECIMAL(6,4) NOT NULL,
   dividend_amount DECIMAL(12,2) NOT NULL,
   status ENUM('CALCULATED','PENDING_SETTLEMENT','SETTLED') NOT NULL DEFAULT 'CALCULATED',
@@ -324,7 +324,7 @@ CREATE TABLE farmer_dividend (
   CONSTRAINT fk_dividend_order FOREIGN KEY (order_id) REFERENCES sales_order(id),
   CONSTRAINT fk_dividend_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profile(id),
   CONSTRAINT fk_dividend_plot FOREIGN KEY (plot_id) REFERENCES farm_plot(id)
-) ENGINE=InnoDB COMMENT='平台销售分红';
+) ENGINE=InnoDB COMMENT '平台销售分红';
 
 -- 6. 初始化角色和业务默认参数
 INSERT INTO sys_role (role_code, role_name) VALUES

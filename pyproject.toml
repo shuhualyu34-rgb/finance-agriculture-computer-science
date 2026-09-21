@@ -1,0 +1,14 @@
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# 旧版种子数据生成脚本,保持原样,后续重写时再收紧
+"generate_danqiu_seed.py" = ["E501", "I001", "B007", "UP009", "E741", "F841"]
