@@ -143,7 +143,8 @@ def test_certification_apply(farmer):
     plots = httpx.get(f"{BASE}/api/my/plots", headers=token, timeout=5).json()
     # 找一块没有待审申请的地
     for plot in plots:
-        r = httpx.post(f"{BASE}/api/my/certifications", headers=token, json={"plot_id": plot["id"], "note": "集成测试申请"}, timeout=5)
+        payload = {"plot_id": plot["id"], "note": "集成测试申请"}
+        r = httpx.post(f"{BASE}/api/my/certifications", headers=token, json=payload, timeout=5)
         if r.status_code == 201:
             body = r.json()
             assert body["status"] == "PENDING"
@@ -157,7 +158,8 @@ def test_insurance_quote_and_apply(farmer):
     token = auth(farmer["access_token"])
     plots = httpx.get(f"{BASE}/api/my/plots", headers=token, timeout=5).json()
     area = float(plots[0]["area_mu"])
-    r = httpx.post(f"{BASE}/api/my/insurance", headers=token, json={"plot_id": plots[0]["id"], "product_id": 1}, timeout=5)
+    payload = {"plot_id": plots[0]["id"], "product_id": 1}
+    r = httpx.post(f"{BASE}/api/my/insurance", headers=token, json=payload, timeout=5)
     assert r.status_code == 201, r.text
     quote = r.json()["quote"]
     # PRD:保额=面积×1500;总保费=保额×5%;农户自缴=总保费×20%
@@ -180,7 +182,10 @@ def test_loan_apply_and_bank_review(farmer):
     loan_id = body["id"]
 
     bank = login(BANK_PHONE)
-    pending = httpx.get(f"{BASE}/api/bank/loans", headers=auth(bank["access_token"]), params={"result": "PENDING"}, timeout=5).json()
+    bank_headers = auth(bank["access_token"])
+    pending = httpx.get(
+        f"{BASE}/api/bank/loans", headers=bank_headers, params={"result": "PENDING"}, timeout=5
+    ).json()
     assert any(x["id"] == loan_id for x in pending)
     rv = httpx.put(
         f"{BASE}/api/bank/loans/{loan_id}/review",
