@@ -27,3 +27,4 @@ export const stageMap = {
 }
 export const gradeMap = { SPECIAL: '特级', FIRST: '一级', SECOND: '二级' }
 export const riskMap = { LOW: '低风险', MEDIUM: '中风险', HIGH: '高风险' }
+export const orderStatusMap = { PENDING_PAYMENT: '待支付', PAID: '待发货', SHIPPED: '已发货', COMPLETED: '已完成' }

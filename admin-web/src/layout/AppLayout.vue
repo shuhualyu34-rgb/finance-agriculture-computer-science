@@ -37,6 +37,7 @@ const allMenus = [
   { path: '/certifications', title: '认证审批', roles: ['OPERATOR', 'ADMIN'] },
   { path: '/standards', title: '标准管理', roles: ['OPERATOR', 'ADMIN'] },
   { path: '/trace-codes', title: '溯源码管理', roles: ['OPERATOR', 'ADMIN'] },
+  { path: '/orders', title: '订单管理', roles: ['OPERATOR', 'ADMIN'] },
   { path: '/dividends', title: '分红计算', roles: ['OPERATOR', 'ADMIN'] },
   { path: '/users', title: '用户管理', roles: ['ADMIN'] },
   { path: '/plots', title: '认养管理', roles: ['ADMIN'] },

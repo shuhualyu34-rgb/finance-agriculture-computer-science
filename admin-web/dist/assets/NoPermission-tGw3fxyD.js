@@ -1,0 +1,1 @@
+import{_ as a,k as l,w as o,r as t,o as _,a as c,e as p}from"./index-ClYJY5Ft.js";const i={};function m(n,e){const s=t("el-button"),r=t("el-empty");return _(),l(r,{description:"当前账号没有管理后台访问权限"},{default:o(()=>[c(s,{onClick:e[0]||(e[0]=u=>n.$router.push("/login"))},{default:o(()=>[...e[1]||(e[1]=[p("返回登录",-1)])]),_:1})]),_:1})}const f=a(i,[["render",m]]);export{f as default};

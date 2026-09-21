@@ -35,6 +35,7 @@ npm run build   # 产物在 dist/
 | /certifications | 认证审批 | OPERATOR / ADMIN | 待审列表 Tab；通过（自动升级 CERTIFIED）/驳回/退回整改 + 备注 |
 | /standards | 标准管理 | OPERATOR / ADMIN | 版本下拉；六环节（种植/加工/品控/分级/包装/流通）分组条款展示 |
 | /trace-codes | 溯源码管理 | OPERATOR / ADMIN | 列表 + 状态筛选；生成对话框（手输 plot_id 1~500 + 批次名 + 等级）；停用 |
+| /orders | 订单管理 | OPERATOR / ADMIN | 状态 Tab（全部/待发货/已发货/已完成）；表格（单号/消费者/商品摘要/金额/状态/物流/时间/收货信息弹层解析 address_snapshot）；PAID 订单「发货」弹窗填快递公司+单号 |
 | /dividends | 分红计算 | OPERATOR / ADMIN | 一键计算（幂等）+ 结果统计卡片（扫码订单/分红记录/比例/总额） |
 | /users | 用户管理 | ADMIN | 表格 + 角色筛选 + 姓名/手机号搜索 |
 | /plots | 认养管理 | ADMIN | 地块表格 + 认养开关（el-switch 调 PUT adoption） |

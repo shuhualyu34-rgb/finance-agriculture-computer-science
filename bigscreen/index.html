@@ -125,9 +125,11 @@ function certColor(plot) {
   return '#4b6f93';
 }
 
+let mapChart = null;
 function renderMap(map) {
   const el = document.getElementById('map');
-  const chart = echarts.init(el);
+  if (mapChart) mapChart.dispose();
+  const chart = mapChart = echarts.init(el);
   const plots = (map.plots || []).filter(p => p.boundary && p.boundary.coordinates && p.boundary.coordinates[0]);
   let lngs = [], lats = [];
   plots.forEach(p => p.boundary.coordinates[0].forEach(c => { lngs.push(c[0]); lats.push(c[1]); }));

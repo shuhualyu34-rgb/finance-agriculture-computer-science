@@ -16,6 +16,7 @@ const routes = [
       { path: 'certifications', name: 'certifications', component: () => import('../views/Certifications.vue'), meta: { title: '认证审批', roles: ['OPERATOR', 'ADMIN'] } },
       { path: 'standards', name: 'standards', component: () => import('../views/Standards.vue'), meta: { title: '标准管理', roles: ['OPERATOR', 'ADMIN'] } },
       { path: 'trace-codes', name: 'traceCodes', component: () => import('../views/TraceCodes.vue'), meta: { title: '溯源码管理', roles: ['OPERATOR', 'ADMIN'] } },
+      { path: 'orders', name: 'orders', component: () => import('../views/Orders.vue'), meta: { title: '订单管理', roles: ['OPERATOR', 'ADMIN'] } },
       { path: 'dividends', name: 'dividends', component: () => import('../views/Dividends.vue'), meta: { title: '分红计算', roles: ['OPERATOR', 'ADMIN'] } },
       { path: 'users', name: 'users', component: () => import('../views/Users.vue'), meta: { title: '用户管理', roles: ['ADMIN'] } },
       { path: 'plots', name: 'plots', component: () => import('../views/Plots.vue'), meta: { title: '认养管理', roles: ['ADMIN'] } },
