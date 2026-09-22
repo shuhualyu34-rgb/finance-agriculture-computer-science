@@ -41,7 +41,9 @@ const allMenus = [
   { path: '/dividends', title: '分红计算', roles: ['OPERATOR', 'ADMIN'] },
   { path: '/users', title: '用户管理', roles: ['ADMIN'] },
   { path: '/plots', title: '认养管理', roles: ['ADMIN'] },
-  { path: '/config', title: '数据配置', roles: ['ADMIN'] }
+  { path: '/config', title: '数据配置', roles: ['ADMIN'] },
+  { path: '/reports', title: '监管报表', roles: ['GOVERNMENT', 'ADMIN'] },
+  { path: '/inspections', title: '实地采集', roles: ['GOVERNMENT', 'ADMIN'] }
 ]
 
 const menus = computed(() => allMenus.filter((m) => hasRole(...m.roles)))

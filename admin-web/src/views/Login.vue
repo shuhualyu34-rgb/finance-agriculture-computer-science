@@ -53,7 +53,7 @@ async function doLogin() {
     setAuth(data)
     ElMessage.success('登录成功')
     const roles = data.user.roles || []
-    router.push(roles.includes('BANK') ? '/loans' : roles.includes('INSURANCE') ? '/policies' : '/certifications')
+    router.push(roles.includes('BANK') ? '/loans' : roles.includes('INSURANCE') ? '/policies' : roles.includes('GOVERNMENT') ? '/reports' : '/certifications')
   } finally {
     loading.value = false
   }

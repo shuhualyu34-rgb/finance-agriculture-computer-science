@@ -21,6 +21,8 @@ const routes = [
       { path: 'users', name: 'users', component: () => import('../views/Users.vue'), meta: { title: '用户管理', roles: ['ADMIN'] } },
       { path: 'plots', name: 'plots', component: () => import('../views/Plots.vue'), meta: { title: '认养管理', roles: ['ADMIN'] } },
       { path: 'config', name: 'config', component: () => import('../views/Config.vue'), meta: { title: '数据配置', roles: ['ADMIN'] } },
+      { path: 'reports', name: 'reports', component: () => import('../views/Reports.vue'), meta: { title: '监管报表', roles: ['GOVERNMENT', 'ADMIN'] } },
+      { path: 'inspections', name: 'inspections', component: () => import('../views/Inspections.vue'), meta: { title: '实地采集', roles: ['GOVERNMENT', 'ADMIN'] } },
       { path: 'no-permission', name: 'noPermission', component: () => import('../views/NoPermission.vue'), meta: { title: '无权限' } }
     ]
   }

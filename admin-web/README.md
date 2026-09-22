@@ -36,6 +36,8 @@ npm run build   # 产物在 dist/
 | /standards | 标准管理 | OPERATOR / ADMIN | 版本下拉；六环节（种植/加工/品控/分级/包装/流通）分组条款展示 |
 | /trace-codes | 溯源码管理 | OPERATOR / ADMIN | 列表 + 状态筛选；生成对话框（手输 plot_id 1~500 + 批次名 + 等级）；停用 |
 | /orders | 订单管理 | OPERATOR / ADMIN | 状态 Tab（全部/待发货/已发货/已完成）；表格（单号/消费者/商品摘要/金额/状态/物流/时间/收货信息弹层解析 address_snapshot）；PAID 订单「发货」弹窗填快递公司+单号 |
+| /reports | 监管报表 | GOVERNMENT / ADMIN | 生成周报/月报/季报（幂等重建）；列表（类型/周期/状态/时间）；详情抽屉分区展示（农户/生产合规+缺漏名单标红/巡检/保险/贷款/销售/现场备注）；DRAFT 可「确认上报」填备注；「打印/导出PDF」（window.print + @media print 隐藏菜单） |
+| /inspections | 实地采集 | GOVERNMENT / ADMIN | 录入表单（地块ID手输/日期默认今天/结果单选/实测面积选填/差异说明/需整改开关，面积差异>20% 后端自动转预警）；列表表格（结果标色、交叉核验差异说明高亮、需整改标记） |
 | /dividends | 分红计算 | OPERATOR / ADMIN | 一键计算（幂等）+ 结果统计卡片（扫码订单/分红记录/比例/总额） |
 | /users | 用户管理 | ADMIN | 表格 + 角色筛选 + 姓名/手机号搜索 |
 | /plots | 认养管理 | ADMIN | 地块表格 + 认养开关（el-switch 调 PUT adoption） |
