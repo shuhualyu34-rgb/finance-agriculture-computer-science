@@ -10,6 +10,7 @@ const routes = [
     redirect: '/loans',
     children: [
       { path: 'loans', name: 'loans', component: () => import('../views/Loans.vue'), meta: { title: '授信审批', roles: ['BANK', 'ADMIN'] } },
+      { path: 'government', name: 'government', component: () => import('../views/Government.vue'), meta: { title: '政府监管', roles: ['GOVERNMENT', 'ADMIN'] } },
       { path: 'policies', name: 'policies', component: () => import('../views/Policies.vue'), meta: { title: '保单管理', roles: ['INSURANCE', 'ADMIN'] } },
       { path: 'claims/new', name: 'claimNew', component: () => import('../views/ClaimCreate.vue'), meta: { title: '理赔处理', roles: ['INSURANCE', 'ADMIN'] } },
       { path: 'claims', name: 'claims', component: () => import('../views/Claims.vue'), meta: { title: '理赔台账', roles: ['INSURANCE', 'ADMIN'] } },

@@ -31,6 +31,7 @@ const router = useRouter()
 
 const allMenus = [
   { path: '/loans', title: '授信审批', roles: ['BANK', 'ADMIN'] },
+  { path: '/government', title: '政府监管', roles: ['GOVERNMENT', 'ADMIN'] },
   { path: '/policies', title: '保单管理', roles: ['INSURANCE', 'ADMIN'] },
   { path: '/claims/new', title: '理赔处理', roles: ['INSURANCE', 'ADMIN'] },
   { path: '/claims', title: '理赔台账', roles: ['INSURANCE', 'ADMIN'] },

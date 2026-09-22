@@ -17,13 +17,14 @@
       <div class="row-line"><span class="k">面积</span><span>{{ p.area_mu }} 亩</span></div>
       <div class="row-line"><span class="k">品种</span><span>{{ p.variety }}</span></div>
       <div class="row-line"><span class="k">已认养</span><span>{{ p.adopted_count }} 人</span></div>
-      <van-image width="100%" height="120" fit="cover" :src="p.satellite_image_url" style="margin-top:8px;border-radius:8px">
-        <template #error>
-          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#eef3ef;color:#8aa592;font-size:13px">
-            🛰️ 卫星影像
-          </div>
-        </template>
-      </van-image>
+      <van-image
+        v-if="usableImage(p.satellite_image_url)"
+        width="100%"
+        height="120"
+        fit="cover"
+        :src="usableImage(p.satellite_image_url)"
+        style="margin-top:8px;border-radius:8px"
+      />
       <van-button round block type="primary" color="#4a7c59" style="margin-top:12px" @click="adopt(p)">
         认养这块田
       </van-button>
@@ -38,6 +39,10 @@ import api from '../../api'
 
 const plots = ref([])
 const loading = ref(true)
+
+function usableImage(url) {
+  return typeof url === 'string' && url.trim() && !url.includes('danqiu.example.com') ? url : ''
+}
 
 onMounted(async () => {
   try {

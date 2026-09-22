@@ -35,6 +35,8 @@ const form = reactive({ phone: '', captcha: '1234' })
 
 const accounts = [
   { label: '银行', phone: '13764807553' },
+  { label: '农业局监管员', phone: '13731585546' },
+  { label: '乡镇农技员', phone: '13754265498' },
   { label: '保险', phone: '13753091709' },
   { label: '品牌运营', phone: '13799943797' },
   { label: '管理员', phone: '13765250068' }
@@ -53,7 +55,7 @@ async function doLogin() {
     setAuth(data)
     ElMessage.success('登录成功')
     const roles = data.user.roles || []
-    router.push(roles.includes('BANK') ? '/loans' : roles.includes('INSURANCE') ? '/policies' : '/certifications')
+    router.push(roles.includes('BANK') ? '/loans' : roles.includes('INSURANCE') ? '/policies' : roles.includes('GOVERNMENT') ? '/government' : '/certifications')
   } finally {
     loading.value = false
   }

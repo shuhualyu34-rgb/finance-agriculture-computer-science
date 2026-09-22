@@ -29,7 +29,7 @@ def products() -> list[dict[str, Any]]:
         JOIN farmer_profile f ON f.id = p.farmer_id
         JOIN sys_user u ON u.id = f.user_id
         WHERE pr.status = 'ON_SALE'
-        ORDER BY pr.id LIMIT 100
+        ORDER BY pr.id DESC LIMIT 100
         """
     )
 

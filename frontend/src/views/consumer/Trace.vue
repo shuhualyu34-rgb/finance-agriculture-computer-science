@@ -31,13 +31,13 @@
 
       <div class="card">
         <div class="card-title">卫星影像</div>
-        <van-image width="100%" height="160" fit="cover" :src="trace.satellite_image_url">
-          <template #error>
-            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#eef3ef;color:#8aa592;font-size:13px">
-              🛰️ 卫星影像（演示数据，不可加载）
-            </div>
-          </template>
-        </van-image>
+        <van-image
+          v-if="usableImage(trace.satellite_image_url)"
+          width="100%"
+          height="160"
+          fit="cover"
+          :src="usableImage(trace.satellite_image_url)"
+        />
         <div class="muted" style="margin-top:6px">地块坐标：{{ trace.longitude }}, {{ trace.latitude }}</div>
       </div>
 
@@ -85,6 +85,10 @@ const route = useRoute()
 const code = ref(typeof route.query.code === 'string' && route.query.code ? route.query.code : DEMO_TRACE_CODE)
 const trace = ref(null)
 const loading = ref(false)
+
+function usableImage(url) {
+  return typeof url === 'string' && url.trim() && !url.includes('danqiu.example.com') ? url : ''
+}
 
 onMounted(() => {
   if (code.value) query()

@@ -23,7 +23,9 @@ services:
       # 首次启动自动建库导数据(按文件名顺序执行)
       - ./danqiu_platform_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./danqiu_rice_seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
-      - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ./migrations/001_open_for_adoption.sql:/docker-entrypoint-initdb.d/03-open-for-adoption.sql:ro
+      - ./migrations/002_fix_schema_seeded_text.sql:/docker-entrypoint-initdb.d/04-fix-schema-seeded-text.sql:ro
+      - ./migrations/003_add_rice_products.sql:/docker-entrypoint-initdb.d/05-add-rice-products.sql:ro
     ports:
       - "127.0.0.1:3307:3306"   # 宿主机 3307 -> 容器 3306,便于本地调试
 
