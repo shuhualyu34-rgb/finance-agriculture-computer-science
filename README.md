@@ -101,13 +101,17 @@ Dockerfile               后端镜像
 | 消费者 | 13900015066 | 张玲 |
 | 银行 | 13764807553 | 农行审批员 |
 | 保险 | 13753091709 | 人保核保员 |
+| 品牌运营 | 13799943797 | 品牌运营专员 |
+| 政府监管 | 13731585546 | 农业局监管员 |
 | 管理员 | 13765250068 | 平台管理员 |
 
-- 农户端 `/api/my/*`:summary、plots、records(GET/POST)、certifications(GET/POST)、policies、insurance(POST)、loans(GET/POST)、claims、dividends
-- 消费端:`GET /api/adoption/plots`、`POST /api/adoption/orders`(模拟支付)
+- 农户端 `/api/my/*`:summary、plots、records(GET/POST)、certifications(GET/POST)、policies、insurance(POST)、loans(GET/POST)、claims、dividends、income(四类收入年汇总)
+- 消费端:`GET /api/adoption/plots`、`POST /api/adoption/orders`(模拟支付)、商城 `/api/shop/*`(products/orders/pay/confirm/my-orders)
 - 银行端 `/api/bank/*`:loans、farmers/{id} 画像、loans/{id}/review
 - 保险端 `/api/insurance/*`:policies、claims(GET/POST/PUT review)
-- 管理端 `/api/admin/*`:certifications 审批、dividends/calculate
+- 品牌运营 `/api/operator/*`:standards(六环节条款)、trace-codes(生成/停用);`/api/admin/*`:certifications 审批、dividends/calculate;商城 `/api/shop/orders` 发货
+- 管理后台 `/api/admin/*`:users、plots(认养开关)、insurance-products(参数)
+- 政府监管 `/api/government/*`:dashboard(大屏,公开)、reports(周/月/季生成/确认/留档)、inspections(实地采集,面积差异>20% 自动预警)
 - 上传:`POST /api/uploads`(multipart)→ `/uploads/...` 静态访问
 - 溯源演示码:`0C2895566118471E`
 
@@ -169,6 +173,7 @@ backend/ml/
 - [x] 阶段 0:工程基线(Docker 化、git、测试基线)
 - [x] 阶段 1a:后端鉴权 + 写入闭环
 - [x] 阶段 1b:农户端/消费端 H5(frontend/,`npm run dev` → http://localhost:5173)
-- [ ] 阶段 2:银行/保险/品牌运营/政府监管 Web 端 + 监管报表
-- [ ] 阶段 2:银行/保险/品牌运营/政府监管 Web 端 + 监管报表
+- [x] 阶段 2:银行/保险/品牌运营/政府监管 Web 端 + 在线商城闭环 + 政府大屏
+- [x] 阶段 3:监管报表(周/月/季)+ 实地采集交叉核验 + 农户收入四类明细
+- [x] 阶段 2.5(协作):银行信用评分卡 + 保险产量预测模型
 - [ ] 阶段 3:B 线区域公用品牌平台(见 regional-brand-api/)

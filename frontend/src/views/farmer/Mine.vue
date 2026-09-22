@@ -4,6 +4,13 @@
       <div class="hello">{{ userName }}</div>
       <div class="sub">电话：{{ phone }}</div>
     </div>
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" @click="$router.push('/farmer/income')">
+      <div>
+        <div style="font-weight:600;font-size:14px">💰 我的收入</div>
+        <div class="muted" style="margin-top:2px">地租 · 工资 · 品牌溢价 · 平台销售分红</div>
+      </div>
+      <van-icon name="arrow" color="#999" />
+    </div>
     <div style="margin-bottom:12px">
       <van-button size="small" plain round color="#4a7c59" @click="onLogout">退出登录</van-button>
     </div>

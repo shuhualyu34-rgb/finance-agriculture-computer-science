@@ -2,3 +2,11 @@ body { margin: 0; font-family: "Helvetica Neue", Arial, "PingFang SC", "Microsof
 .page { padding: 16px; }
 .toolbar { margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .stat-card { text-align: center; }
+@media print {
+  .el-aside, .el-header, .el-tabs, .no-print { display: none !important; }
+  .el-main { padding: 0 !important; }
+  body { background: #fff; }
+  body.printing-detail * { visibility: hidden; }
+  body.printing-detail .print-area, body.printing-detail .print-area * { visibility: visible; }
+  body.printing-detail .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+}

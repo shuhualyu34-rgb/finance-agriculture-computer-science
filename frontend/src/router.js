@@ -10,6 +10,7 @@ import FarmerPlotDetail from './views/farmer/PlotDetail.vue'
 import FarmerUpload from './views/farmer/Upload.vue'
 import FarmerApply from './views/farmer/Apply.vue'
 import FarmerMine from './views/farmer/Mine.vue'
+import FarmerIncome from './views/farmer/Income.vue'
 import ConsumerTrace from './views/consumer/Trace.vue'
 import ConsumerAdopt from './views/consumer/Adopt.vue'
 import ConsumerMine from './views/consumer/Mine.vue'
@@ -43,6 +44,11 @@ const router = createRouter({
     {
       path: '/farmer/apply',
       component: FarmerApply,
+      meta: { role: 'FARMER' },
+    },
+    {
+      path: '/farmer/income',
+      component: FarmerIncome,
       meta: { role: 'FARMER' },
     },
     {
