@@ -404,3 +404,65 @@ def test_mall_full_loop_to_dividend(consumer):
     assert calc2.json()["dividends_created"] == 0
 
 
+def test_government_reports_and_inspections():
+    gov = login("13731585546")  # 农业局监管员
+    token = auth(gov["access_token"])
+
+    # 生成周报/月报(幂等)
+    r = httpx.post(f"{BASE}/api/government/reports/generate", headers=token,
+                   json={"report_type": "WEEKLY"}, timeout=10)
+    assert r.status_code == 201, r.text
+    weekly = r.json()
+    assert weekly["report_period"].count("-W") == 1
+    again = httpx.post(f"{BASE}/api/government/reports/generate", headers=token,
+                       json={"report_type": "WEEKLY"}, timeout=10)
+    assert again.json()["id"] == weekly["id"] and again.json()["created"] is False
+
+    monthly = httpx.post(f"{BASE}/api/government/reports/generate", headers=token,
+                         json={"report_type": "MONTHLY"}, timeout=10).json()
+
+    # 详情内容结构
+    detail = httpx.get(f"{BASE}/api/government/reports/{monthly['id']}", headers=token, timeout=5).json()
+    assert {"farmers", "production", "inspections", "insurance", "loans", "sales"} <= set(detail["content"])
+
+    # 确认(含现场备注)
+    rv = httpx.put(f"{BASE}/api/government/reports/{monthly['id']}/confirm", headers=token,
+                   json={"note": "现场抽查无异常"}, timeout=5)
+    assert rv.status_code == 200
+    d2 = httpx.get(f"{BASE}/api/government/reports/{monthly['id']}", headers=token, timeout=5).json()
+    assert d2["status"] == "CONFIRMED" and d2["content"]["site_note"] == "现场抽查无异常"
+
+    # 留档列表
+    reports = httpx.get(f"{BASE}/api/government/reports", headers=token, timeout=5).json()
+    assert any(x["id"] == monthly["id"] for x in reports)
+
+    # 实地采集:面积差异 >20% 自动预警
+    insp = httpx.post(f"{BASE}/api/government/inspections", headers=token, json={
+        "plot_id": 1, "inspection_date": "2026-09-21", "result": "PASS",
+        "actual_area_mu": 0.5,
+    }, timeout=5)
+    assert insp.status_code == 201, insp.text
+    body = insp.json()
+    assert body["auto_warning"] is True and body["result"] == "WARNING"
+    assert "面积交叉核验" in body["note"]
+    listing = httpx.get(f"{BASE}/api/government/inspections", headers=token, timeout=5).json()
+    assert any(x["id"] == body["id"] for x in listing)
+
+    # 农户角色不能访问
+    farmer_token = auth(login(FARMER_PHONE)["access_token"])
+    r403 = httpx.get(f"{BASE}/api/government/reports", headers=farmer_token, timeout=5)
+    assert r403.status_code == 403
+
+
+def test_farmer_income(farmer):
+    token = auth(farmer["access_token"])
+    r = httpx.get(f"{BASE}/api/my/income", headers=token, timeout=5)
+    assert r.status_code == 200
+    body = r.json()
+    assert {"RENT", "WAGE", "BRAND_PREMIUM", "DIVIDEND", "TOTAL"} <= set(body["summary"])
+    assert body["summary"]["RENT"] > 0
+    assert body["summary"]["WAGE"] > 0
+    assert isinstance(body["items"], list)
+
+
+

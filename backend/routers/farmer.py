@@ -330,3 +330,32 @@ def my_dividends(user: CurrentUser) -> list[dict[str, Any]]:
         """,
         (farmer["id"],),
     )
+
+@router.get("/income")
+def my_income(user: CurrentUser, year: str | None = Query(default=None)) -> dict[str, Any]:
+    """我的收入(PRD §4.1):地租 + 工资 + 品牌溢价 + 平台销售分红,按年汇总。"""
+    farmer = farmer_profile(user)
+    fid = farmer["id"]
+    year = year or str(date.today().year)
+    items = query(
+        """
+        SELECT income_type, amount, period, remark, created_at, 'INCOME' AS source
+        FROM farmer_income WHERE farmer_id = %s AND period = %s
+        UNION ALL
+        SELECT 'DIVIDEND' AS income_type, d.dividend_amount AS amount,
+               YEAR(COALESCE(d.settled_at, o.completed_at)) AS period,
+               CONCAT('平台引流订单 ', o.order_no) AS remark,
+               COALESCE(d.settled_at, o.completed_at) AS created_at, 'DIVIDEND' AS source
+        FROM farmer_dividend d
+        JOIN sales_order o ON o.id = d.order_id
+        WHERE d.farmer_id = %s AND YEAR(COALESCE(d.settled_at, o.completed_at)) = %s
+        ORDER BY created_at DESC
+        """,
+        (fid, year, fid, year),
+    )
+    summary = {k: 0.0 for k in ("RENT", "WAGE", "BRAND_PREMIUM", "DIVIDEND")}
+    for it in items:
+        summary[it["income_type"]] = round(summary.get(it["income_type"], 0) + float(it["amount"]), 2)
+    summary["TOTAL"] = round(sum(summary.values()), 2)
+    return {"year": year, "summary": summary, "items": items}
+
