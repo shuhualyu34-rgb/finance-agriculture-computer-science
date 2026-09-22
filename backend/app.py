@@ -16,6 +16,7 @@ from backend.routers import (
     farmer,
     government,
     insurance,
+    ml,
     operator,
     overview,
     shop,
@@ -52,10 +53,19 @@ app.include_router(insurance.router, dependencies=[Depends(require_roles("INSURA
 app.include_router(operator.router, dependencies=[Depends(require_roles("OPERATOR", "ADMIN"))])
 app.include_router(admin.router, dependencies=[Depends(require_roles("OPERATOR", "ADMIN"))])
 
+# 算法模型推理(银行端评分卡 / 保险端产量预测,守卫在路由内逐端点挂载)
+app.include_router(ml.router)
+
 # 图片上传(登录即可)与静态访问
 app.include_router(uploads.router)
 _uploads = settings.upload_dir
-os.makedirs(_uploads, exist_ok=True)
+try:
+    os.makedirs(_uploads, exist_ok=True)
+except OSError:
+    # 本地开发无 /app 目录时回退到仓库内 uploads/,Docker 内仍用 /app/uploads
+    _uploads = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "uploads")
+    os.makedirs(_uploads, exist_ok=True)
+    settings.upload_dir = _uploads
 app.mount("/uploads", StaticFiles(directory=_uploads), name="uploads")
 
 # 政府监管大屏静态页(若有)

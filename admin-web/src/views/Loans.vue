@@ -47,6 +47,33 @@
           <el-descriptions-item label="村组">{{ profile.village || '-' }}</el-descriptions-item>
           <el-descriptions-item label="认证状态">{{ certStatusMap[profile.certification_status] || profile.certification_status }}</el-descriptions-item>
         </el-descriptions>
+
+        <h4>信用评分（算法模型）</h4>
+        <el-alert
+          v-if="credit && credit.model_status && !credit.model_status.enabled"
+          type="warning" :closable="false" show-icon
+          :title="credit.note || '评分卡未启用，当前为规则评分'"
+          style="margin-bottom: 8px"
+        />
+        <el-descriptions v-if="credit" :column="3" border size="small">
+          <el-descriptions-item label="信用评分">
+            <span
+              :style="{
+                fontSize: '20px', fontWeight: 700,
+                color: credit.score >= 600 ? '#67c23a' : credit.score >= 450 ? '#e6a23c' : '#f56c6c'
+              }"
+            >{{ credit.score }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="风险等级">
+            <el-tag :type="credit.risk_level === 'LOW' ? 'success' : credit.risk_level === 'MEDIUM' ? 'warning' : 'danger'">
+              {{ riskMap[credit.risk_level] || credit.risk_level }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="违约概率">
+            {{ credit.default_probability != null ? (credit.default_probability * 100).toFixed(2) + '%' : '-' }}
+          </el-descriptions-item>
+        </el-descriptions>
+
         <h4>地块（{{ profile.plots?.length || 0 }}）</h4>
         <el-table :data="profile.plots || []" size="small" border>
           <el-table-column prop="plot_code" label="地块编码" />
@@ -108,6 +135,7 @@ const rows = ref([])
 const loading = ref(false)
 const profileVisible = ref(false)
 const profile = ref(null)
+const credit = ref(null)
 const reviewVisible = ref(false)
 const current = ref(null)
 const review = ref({ result: 'APPROVED', note: '' })
@@ -122,8 +150,12 @@ async function load() {
 
 async function showProfile(row) {
   profile.value = null
+  credit.value = null
   profileVisible.value = true
   profile.value = await http.get('/api/bank/farmers/' + row.farmer_id)
+  try {
+    credit.value = await http.get('/api/bank/credit-score/' + row.farmer_id)
+  } catch (e) { /* 评分接口异常不影响画像展示 */ }
 }
 
 function openReview(row) {

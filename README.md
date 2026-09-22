@@ -78,8 +78,9 @@ pytest                        # 单元 + 集成(API 未启动时集成用例自�
 backend/                 FastAPI 后端(阶段 1:鉴权 + 写入闭环)
   app.py                 路由装配
   auth.py / config.py / db.py / rules.py / schemas.py
-  routers/               overview(只读)/ auth / farmer / consumer / bank / insurance / admin / uploads
-  tests/                 pytest(30 用例:单元 + 全链路集成)
+  routers/               overview(只读)/ auth / farmer / consumer / bank / insurance / admin / uploads / ml
+  ml/                    算法模型(评分卡 + 产量预测,详见"算法模型"章节)
+  tests/                 pytest(单元 + 全链路集成)
 frontend/                H5 前端(农户端 + 消费端,Vite + Vue3 + Vant)
 regional-brand-api/      区域公用品牌平台 API 设计稿(OpenAPI 3.0,B 线)
 migrations/              增量迁移(001:认养开放标记)
@@ -115,6 +116,53 @@ Dockerfile               后端镜像
 - **保险**:保额 = 面积 × 1500 元/亩;总保费 = 保额 × 5%(政府补贴 80%、农户自缴 20%);赔付 = 保额 × 受灾比例
 - **贷款建议**:建议额度 = 面积 × 800 元/亩;风险评级:认证+保险=低、无保险=中、信息不全=高(系统只出建议,银行自行决定)
 - **本期不做**(MVP 边界):真实短信/支付、物联网、卫星实时计算、真实放款、区块链/大模型
+
+## 算法模型(阶段 2.5:银行端评分卡 + 保险端产量预测)
+
+基于仓库内种子数据离线训练的轻量 ML 能力,不依赖 Docker/数据库即可复现。
+
+### 模型与接口
+
+| 模型 | 端 | 接口 | 输出 | 当前指标(种子数据) |
+|---|---|---|---|---|
+| 逻辑回归信用评分卡 | 银行端 | `GET /api/bank/credit-score/{farmer_id}`(需 BANK/ADMIN) | 评分(300-900)、违约概率、风险档 | AUC≈0.55(见下方边界说明) |
+| 产量预测(随机森林,择优) | 保险端 | `GET /api/insurance/yield-prediction/{plot_id}`(需 INSURANCE/ADMIN) | 预测亩产、预测总产、与历史实际偏差 | R²≈0.50, MAE≈95 斤/亩 |
+
+### 训练(离线,零外部依赖)
+
+```bash
+.venv\Scripts\activate                    # Windows;macOS/Linux 用 source .venv/bin/activate
+python -m backend.ml.train_credit_scorecard   # → backend/ml/models/credit_scorecard.joblib
+python -m backend.ml.train_yield_model        # → backend/ml/models/yield_model.joblib
+```
+
+数据源为仓库内 `danqiu_rice_seed.sql`(200 户/415 地块),由 `backend/ml/seed_loader.py` 直接解析,
+无需启动 MySQL。模型文件已随仓库提交,clone 后接口即可使用。
+
+### 质量门禁与边界(重要)
+
+- 推理层内置质量门禁:评分卡 **AUC < 0.60**、产量模型 **R² < 0.20** 时自动降级为规则计算,
+  响应中 `model_status.enabled=false` 并给出原因,避免输出误导性结果。
+- **当前评分卡为降级状态**:种子数据的 `bank_result` 审批标签由生成器**随机生成**(与农户特征无关),
+  因此 AUC≈0.55 无学习信号。接口会如实返回规则评分(与 PRD 风险规则同口径)。
+- **启用真实评分卡**:接入真实信贷数据(或改进 `generate_danqiu_seed.py` 使审批结果与农户风险相关)后,
+  重新运行训练脚本;AUC 达标后服务自动启用模型打分,无需改代码。
+- 产量预测在种子数据上即有有效信号(R²≈0.50),接口直接可用,可作为理赔损失评估参考
+  (预测亩产 vs 历史实际亩产的偏差)。
+
+### 模块结构
+
+```
+backend/ml/
+  seed_loader.py            种子 SQL 解析(训练数据源)
+  features.py               特征工程(训练与推理共用)
+  dataset.py                数据集构建(特征+标签)
+  scorecard.py              评分卡分数换算
+  train_credit_scorecard.py 评分卡训练脚本
+  train_yield_model.py      产量模型训练脚本(线性回归 vs 随机森林择优)
+  inference.py              模型加载/推理/质量门禁/规则降级
+  models/                   joblib 模型产物(随仓库提交)
+```
 
 ## 开发路线
 
