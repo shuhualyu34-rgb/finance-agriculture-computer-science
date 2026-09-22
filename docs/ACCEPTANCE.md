@@ -12,6 +12,9 @@
 | 6 | 管理员可录入受灾情况触发理赔,保险公司复核 | ✅ | POST /api/insurance/claims(赔付=保额×受灾比例)+ PUT /claims/{id}/review | pytest test_claim_flow |
 | 7 | 政府大屏数字随后台更新 | ✅ | bigscreen/ 随 API 发布(http://127.0.0.1:8010/bigscreen/):17 项指标卡片实时聚合、415 块地边界地图(认证着色/认养描边)、业务动态滚动,每分钟自动刷新 | GET /api/government/dashboard + 页面实测 |
 | 加分 | 在线商城与利益联结(PRD §12) | ✅ | 下单(库存扣减)→模拟支付→运营发货(物流单号)→确认收货→自动分红(5%),全链路集成测试覆盖 | pytest test_mall_full_loop_to_dividend |
+| 加分 | 监管报表周/月/季(PRD §11.4) | ✅ 后端 | 幂等生成、合规率/缺漏名单/巡检/保险/贷款/销售汇总、确认上报+备注留档;页面接入中 | pytest test_government_reports_and_inspections |
+| 加分 | 实地采集交叉核验(PRD §11.5) | ✅ 后端 | 录入留痕(采集人/时间/说明);面积差异>20% 自动转 WARNING 并记录差异 | 同上 |
+| 加分 | 农户收入四类明细(PRD §4.1) | ✅ 后端 | 迁移003:地租/工资/品牌溢价 + 平台分红并入年汇总;H5 页面接入中 | pytest test_farmer_income |
 
 ## PRD 业务规则一致性(§六)
 
