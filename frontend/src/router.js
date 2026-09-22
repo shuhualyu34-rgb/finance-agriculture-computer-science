@@ -16,6 +16,7 @@ import ConsumerAdopt from './views/consumer/Adopt.vue'
 import ConsumerMine from './views/consumer/Mine.vue'
 import ConsumerShop from './views/consumer/Shop.vue'
 import ConsumerOrders from './views/consumer/Orders.vue'
+import ConsumerLayout from './views/consumer/Layout.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -56,11 +57,17 @@ const router = createRouter({
       component: Login,
       props: { side: 'consumer' },
     },
-    { path: '/consumer', component: ConsumerTrace },
-    { path: '/consumer/adopt', component: ConsumerAdopt, meta: { role: 'CONSUMER' } },
-    { path: '/consumer/mine', component: ConsumerMine, meta: { role: 'CONSUMER' } },
-    { path: '/consumer/shop', component: ConsumerShop },
-    { path: '/consumer/orders', component: ConsumerOrders, meta: { role: 'CONSUMER' } },
+    {
+      path: '/consumer',
+      component: ConsumerLayout,
+      children: [
+        { path: '', component: ConsumerTrace },
+        { path: 'adopt', component: ConsumerAdopt, meta: { role: 'CONSUMER' } },
+        { path: 'mine', component: ConsumerMine, meta: { role: 'CONSUMER' } },
+        { path: 'shop', component: ConsumerShop },
+        { path: 'orders', component: ConsumerOrders, meta: { role: 'CONSUMER' } },
+      ],
+    },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

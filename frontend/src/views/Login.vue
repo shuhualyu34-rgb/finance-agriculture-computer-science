@@ -69,7 +69,7 @@ async function onSubmit() {
     }
     showToast({ type: 'success', message: '登录成功' })
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
-    router.replace(redirect || (isFarmer ? '/farmer' : '/consumer/adopt'))
+    router.replace(redirect || (isFarmer ? '/farmer' : '/consumer'))
   } catch (e) {
     showToast(e.message || '登录失败')
   } finally {
