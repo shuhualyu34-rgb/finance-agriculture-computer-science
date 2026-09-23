@@ -11,6 +11,13 @@
       </div>
       <van-icon name="arrow" color="#999" />
     </div>
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:600;font-size:14px">👵 关怀模式</div>
+        <div class="muted" style="margin-top:2px">大字显示 · 右下角🔊朗读本页</div>
+      </div>
+      <van-switch :model-value="careMode" size="24px" active-color="#4a7c59" @update:model-value="onCareToggle" />
+    </div>
     <div style="margin-bottom:12px">
       <van-button size="small" plain round color="#4a7c59" @click="onLogout">退出登录</van-button>
     </div>
@@ -86,6 +93,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import api, { getAuth, logout } from '../../api'
+import { careMode, toggleCare, speak } from '../../care'
 import {
   BANK_RESULT, RISK_LEVEL, POLICY_STATUS, CLAIM_STATUS, DIVIDEND_STATUS,
   mapOf, tagTypeOf, fmtMoney, fmtDate,
@@ -108,6 +116,11 @@ const loading = ref(true)
 function onLogout() {
   logout()
   router.replace('/farmer/login')
+}
+
+function onCareToggle(on) {
+  toggleCare(on)
+  if (on) speak('关怀模式已开启，字变大了。点击右下角喇叭按钮，可以朗读本页内容。')
 }
 
 onMounted(async () => {

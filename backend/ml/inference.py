@@ -11,7 +11,7 @@ from functools import lru_cache
 from typing import Any
 
 from backend.ml.features import CREDIT_FEATURES, YIELD_FEATURES
-from backend.ml.scorecard import risk_band, score_from_probability
+from backend.ml.scorecard import probability_from_score, risk_band, score_from_probability
 
 MODELS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
 CREDIT_MODEL_PATH = os.path.join(MODELS_DIR, "credit_scorecard.joblib")
@@ -56,7 +56,8 @@ def credit_score(features: dict[str, float]) -> dict[str, Any]:
         score = _rule_fallback_score(features)
         result: dict[str, Any] = {
             "score": score,
-            "default_probability": None,
+            "default_probability": round(probability_from_score(score), 4),
+            "default_probability_source": "score-implied-estimate",
             "risk_level": risk_band(score),
             "model": "rule-fallback",
             "model_status": {

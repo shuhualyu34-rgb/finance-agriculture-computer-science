@@ -19,6 +19,13 @@ def score_from_probability(probability: float) -> int:
     return int(round(min(900.0, max(300.0, score))))
 
 
+def probability_from_score(score: int) -> float:
+    """把评分反推为对应的违约概率，用于规则降级时提供可解释的 0.x 概率。"""
+    s = min(900.0, max(300.0, float(score)))
+    odds = math.exp((BASE_SCORE - s) * math.log(2) / PDO)
+    return odds / (1 + odds)
+
+
 def risk_band(score: int) -> str:
     if score < 450:
         return "HIGH"

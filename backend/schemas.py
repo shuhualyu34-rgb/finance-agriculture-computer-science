@@ -53,5 +53,14 @@ class ClaimCreate(BaseModel):
     disaster_rate: float = Field(ge=0, le=1)
 
 
+class WeatherAssessCreate(BaseModel):
+    """气象指数定损输入:风速与过程雨量(演示数据源,非真实气象机构接入)。"""
+
+    policy_id: int
+    wind_speed_kmh: float = Field(default=0, ge=0, le=500)
+    rainfall_mm: float = Field(default=0, ge=0, le=3000)
+    note: str = ""
+
+
 class ClaimReview(BaseModel):
     status: str  # APPROVED / REJECTED / PAID

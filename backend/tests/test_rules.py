@@ -10,7 +10,9 @@ from backend.rules import (
     dividend_amount,
     insurance_quote,
     loan_suggestion,
+    product_quote,
     risk_level,
+    weather_index_assessment,
 )
 
 
@@ -56,6 +58,29 @@ class TestClaim:
             claim_amount(15000, 1.5)
         with pytest.raises(ValueError):
             claim_amount(15000, -0.1)
+
+
+def test_product_matrix_quote():
+    q = product_quote(10, {
+        "product_code": "WEATHER-001",
+        "product_type": "WEATHER_INDEX",
+        "insured_amount_per_mu": 800,
+        "premium_rate": 0.045,
+        "government_subsidy_rate": 0.40,
+    })
+    assert q["insured_amount"] == 8000
+    assert q["total_premium"] == 360
+    assert q["farmer_premium"] == 216
+    assert q["product_type"] == "WEATHER_INDEX"
+
+
+def test_weather_index_assessment():
+    quiet = weather_index_assessment(8000, {"wind_speed_kmh": 80, "rainfall_mm": 120}, 50, 80)
+    assert quiet["triggered"] is False
+    storm = weather_index_assessment(8000, {"wind_speed_kmh": 80, "rainfall_mm": 120}, 100, 80)
+    assert storm["triggered"] is True
+    assert storm["claim_amount"] > 0
+    assert storm["claim_amount"] <= 8000
 
 
 class TestLoan:

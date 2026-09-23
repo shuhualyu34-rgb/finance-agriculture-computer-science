@@ -120,3 +120,58 @@ html, body {
 .van-nav-bar { background: transparent; }
 .van-nav-bar .van-icon { color: #333; }
 .van-nav-bar__title { color: #333; font-weight: 600; }
+
+/* ===== 关怀模式：大字显示 ===== */
+html.care-mode {
+  --van-font-size-sm: 15px;
+  --van-font-size-md: 17px;
+  --van-font-size-lg: 19px;
+  --van-tabbar-height: 60px;
+  --van-tabbar-item-font-size: 15px;
+  --van-tabbar-item-icon-size: 26px;
+  --van-button-normal-font-size: 18px;
+  --van-button-default-height: 48px;
+  --van-tab-font-size: 17px;
+  --van-cell-font-size: 17px;
+  --van-tag-font-size: 15px;
+  --van-empty-description-font-size: 16px;
+  --van-field-label-width: 5.5em;
+}
+html.care-mode body { font-size: 17px; }
+html.care-mode .card { padding: 18px 16px; }
+html.care-mode .card-title { font-size: 19px; }
+html.care-mode .row-line { font-size: 17px; padding: 9px 0; }
+html.care-mode .stat-item { padding: 16px 6px; }
+html.care-mode .stat-item .num { font-size: 26px; }
+html.care-mode .stat-item .num.small { font-size: 20px; }
+html.care-mode .stat-item .label { font-size: 15px; }
+html.care-mode .muted { font-size: 15px; }
+html.care-mode .hero .hello { font-size: 22px; }
+html.care-mode .hero .sub { font-size: 16px; }
+html.care-mode .entry-card { padding: 20px 14px; }
+html.care-mode .entry-card .icon { font-size: 36px; }
+html.care-mode .entry-card .name { font-size: 18px; }
+html.care-mode .entry-card .desc { font-size: 14px; }
+
+/* 关怀模式浮动朗读按钮 */
+.care-speak-btn {
+  position: fixed;
+  right: 14px;
+  bottom: 96px;
+  z-index: 99;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--dq-green);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  user-select: none;
+}
+.care-speak-btn span { font-size: 12px; margin-top: 1px; }
+.care-speak-btn:active { opacity: 0.85; }

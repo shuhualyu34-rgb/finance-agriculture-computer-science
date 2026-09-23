@@ -1,6 +1,6 @@
 """农户端(H5):农事上传、认证/保险/贷款申请、我的收入与分红。"""
 
-import random
+import uuid
 from datetime import date
 from typing import Any
 
@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from backend.auth import CurrentUser, require_roles
 from backend.db import query, query_one, transaction
-from backend.rules import insurance_quote, loan_suggestion, risk_level
+from backend.rules import loan_suggestion, product_quote, risk_level
 from backend.schemas import CertificationCreate, FarmRecordCreate, InsuranceApply, LoanApply
 
 router = APIRouter(prefix="/api/my", tags=["farmer"])
@@ -47,7 +47,8 @@ def current_season() -> dict[str, Any]:
 
 
 def next_no(prefix: str) -> str:
-    return f"{prefix}{date.today().strftime('%Y%m%d')}{random.randint(1000, 9999)}"
+    # 日期 + 8 位十六进制随机后缀,避免同日并发撞 UNIQUE 约束
+    return f"{prefix}{date.today().strftime('%Y%m%d')}{uuid.uuid4().hex[:8].upper()}"
 
 
 @router.get("/summary")
@@ -212,13 +213,22 @@ def my_policies(user: CurrentUser) -> list[dict[str, Any]]:
     farmer = farmer_profile(user)
     return query(
         """
-        SELECT i.*, p.plot_name, pr.product_name
+        SELECT i.*, p.plot_name, pr.product_code, pr.product_type, pr.product_name
         FROM insurance_policy i
         JOIN farm_plot p ON p.id = i.plot_id
         JOIN insurance_product pr ON pr.id = i.product_id
         WHERE i.farmer_id = %s ORDER BY i.id DESC
         """,
         (farmer["id"],),
+    )
+
+
+@router.get("/insurance-products")
+def my_insurance_products(user: CurrentUser) -> list[dict[str, Any]]:
+    return query(
+        "SELECT id, product_code, product_type, product_name, insured_amount_per_mu, premium_rate, "
+        "government_subsidy_rate, trigger_config, description FROM insurance_product "
+        "WHERE status = 'ACTIVE' ORDER BY id"
     )
 
 
@@ -231,12 +241,7 @@ def apply_insurance(user: CurrentUser, body: InsuranceApply) -> dict[str, Any]:
     )
     if not product:
         raise HTTPException(status_code=404, detail="保险产品不存在或已下架")
-    quote = insurance_quote(
-        float(plot["area_mu"]),
-        per_mu=float(product["insured_amount_per_mu"]),
-        premium_rate=float(product["premium_rate"]),
-        farmer_share=1 - float(product["government_subsidy_rate"]),
-    )
+    quote = product_quote(float(plot["area_mu"]), product)
     with transaction() as tx:
         cursor = tx["cursor"]
         cursor.execute(
@@ -358,4 +363,3 @@ def my_income(user: CurrentUser, year: str | None = Query(default=None)) -> dict
         summary[it["income_type"]] = round(summary.get(it["income_type"], 0) + float(it["amount"]), 2)
     summary["TOTAL"] = round(sum(summary.values()), 2)
     return {"year": year, "summary": summary, "items": items}
-

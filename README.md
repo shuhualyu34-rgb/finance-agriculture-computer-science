@@ -30,6 +30,10 @@ docker-compose up -d --build
 # MySQL(宿主机调试): 127.0.0.1:3307  root / danqiu_dev_root(可用 .env 覆盖)
 ```
 
+> 增量迁移:API 启动时由 `backend/migrate.py` 自动执行 `migrations/` 中的 SQL
+> (全新卷与存量卷都生效,执行记录见 `_schema_migrations` 表);
+> 本地开发不启动 API 时可手动执行 `python -m backend.migrate`。
+
 前端两个应用(H5 与管理后台):
 
 ```bash
@@ -84,7 +88,7 @@ backend/                 FastAPI 后端(阶段 1:鉴权 + 写入闭环)
 frontend/                H5 前端(农户端 + 消费端,Vite + Vue3 + Vant)
 regional-brand-api/      区域公用品牌平台 API 设计稿(OpenAPI 3.0,B 线)
 migrations/              增量迁移(001:认养开放标记)
-danqiu_platform_schema.sql   数据库结构(24 张表,含建库语句)
+danqiu_platform_schema.sql   数据库结构(25 张表,含建库语句)
 danqiu_rice_seed.sql         种子数据(200 户,由 generate_danqiu_seed.py 生成)
 docker-compose.yml       db(mysql:8.0) + api(FastAPI)
 Dockerfile               后端镜像
@@ -120,6 +124,12 @@ Dockerfile               后端镜像
 - **保险**:保额 = 面积 × 1500 元/亩;总保费 = 保额 × 5%(政府补贴 80%、农户自缴 20%);赔付 = 保额 × 受灾比例
 - **贷款建议**:建议额度 = 面积 × 800 元/亩;风险评级:认证+保险=低、无保险=中、信息不全=高(系统只出建议,银行自行决定)
 - **本期不做**(MVP 边界):真实短信/支付、物联网、卫星实时计算、真实放款、区块链/大模型
+
+### 保险产品矩阵（当前实现）
+
+保险产品已从单一通用产品扩展为可配置矩阵：基础种植保险、收入保险、价格指数保险、台风暴雨气象指数保险、米质降级保险。农户端可通过 `GET /api/my/insurance-products` 查询产品并选择产品投保；保险端可通过 `GET /api/insurance/products` 查询产品配置。
+
+气象指数保险支持 `POST /api/insurance/weather-index/assess`：输入风速和过程雨量后，系统按产品阈值生成定损草案并写入理赔台账，状态仍为待人工复核。当前数据源为演示输入，不代表真实气象机构接入或自动赔付；真实接入应替换为可信气象数据适配器并保留保险公司复核。
 
 ## 算法模型(阶段 2.5:银行端评分卡 + 保险端产量预测)
 

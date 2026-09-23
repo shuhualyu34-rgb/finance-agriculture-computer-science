@@ -25,7 +25,11 @@
 
       <!-- 保险投保 -->
       <div class="card" v-if="active === 'insurance'">
-        <div class="card-title">保险投保（政策性水稻保险）</div>
+        <div class="card-title">保险投保（特色农险产品）</div>
+        <select v-model="productId" class="native-select">
+          <option v-for="p in products" :key="p.id" :value="p.id">{{ p.product_name }}</option>
+        </select>
+        <div v-if="selectedProduct" class="muted" style="margin:8px 0">{{ selectedProduct.description }}</div>
         <van-field v-model="insPlotName" is-link readonly label="选择地块" placeholder="请选择地块" @click="openPicker('insurance')" />
         <template v-if="quote">
           <div class="section-gap"></div>
@@ -91,12 +95,16 @@ const loanPlotId = ref(null)
 const certNote = ref('')
 const loanPurpose = ref('')
 const quote = ref(null)
+const products = ref([])
+const productId = ref(1)
 const loanResult = ref(null)
 const submitting = ref(false)
 
 onMounted(async () => {
   try {
     plots.value = await api.get('/api/my/plots')
+    products.value = await api.get('/api/my/insurance-products')
+    if (products.value.length) productId.value = products.value[0].id
   } catch (e) {
     showToast(e.message)
   }
@@ -106,6 +114,8 @@ function openPicker(target) {
   pickerTarget.value = target
   showPicker.value = true
 }
+
+const selectedProduct = computed(() => products.value.find((p) => p.id === Number(productId.value)))
 function onPicked({ selectedOptions }) {
   const opt = selectedOptions[0]
   if (pickerTarget.value === 'cert') { certPlotId.value = opt.value; certPlotName.value = opt.text }
@@ -133,7 +143,7 @@ async function submitInsurance() {
   if (!insPlotId.value) return showToast('请选择地块')
   submitting.value = true
   try {
-    const res = await api.post('/api/my/insurance', { plot_id: insPlotId.value, product_id: 1 })
+    const res = await api.post('/api/my/insurance', { plot_id: insPlotId.value, product_id: Number(productId.value) })
     quote.value = res.quote
     showConfirmDialog({
       title: '投保成功',

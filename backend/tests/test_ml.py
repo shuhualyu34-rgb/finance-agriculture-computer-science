@@ -17,7 +17,7 @@ from backend.ml.features import (
     plot_yield_label,
 )
 from backend.ml.inference import credit_score, yield_predict
-from backend.ml.scorecard import risk_band, score_from_probability
+from backend.ml.scorecard import probability_from_score, risk_band, score_from_probability
 from backend.ml.seed_loader import load_seed_sql
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -118,6 +118,11 @@ class TestScorecard:
         # odds=1 (p=0.5) → score = base 600
         assert score_from_probability(0.5) == 600
 
+    def test_probability_from_score(self):
+        assert probability_from_score(600) == pytest.approx(0.5)
+        assert probability_from_score(700) == pytest.approx(0.2, abs=0.001)
+        assert probability_from_score(480) > probability_from_score(550)
+
 
 class TestInferenceFallback:
     def test_credit_rule_fallback(self, monkeypatch):
@@ -125,6 +130,8 @@ class TestInferenceFallback:
         result = credit_score({"certified": 1.0, "has_insurance": 1.0, "profile_complete": 1.0})
         assert result["model"] == "rule-fallback"
         assert result["score"] == 700
+        assert result["default_probability"] == pytest.approx(0.2, abs=0.001)
+        assert result["default_probability_source"] == "score-implied-estimate"
         assert result["risk_level"] == "LOW"
 
     def test_yield_fallback(self, monkeypatch):

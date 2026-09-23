@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from backend.auth import require_roles
 from backend.db import query
@@ -67,6 +67,27 @@ def bank_credit_score(farmer_id: int) -> dict[str, Any]:
     result["farmer_id"] = farmer_id
     result["features"] = features
     return result
+
+
+@router.get("/bank/credit-scores", dependencies=[BankOnly])
+def bank_credit_scores(farmer_ids: str = Query(default="")) -> dict[str, Any]:
+    """银行端:批量信用评分(贷款列表用,单请求返回,避免前端逐户调用的 N+1)。"""
+    ids = [int(p) for p in (s.strip() for s in farmer_ids.split(",")) if p.isdigit()]
+    ids = list(dict.fromkeys(ids))[:50]
+    scores: dict[str, Any] = {}
+    for fid in ids:
+        try:
+            farmer, plots, records, policies = _fetch_farmer_credit_data(fid)
+        except HTTPException:
+            continue  # 农户不存在时跳过,不影响其他农户
+        result = credit_score(farmer_credit_features(farmer, plots, records, policies))
+        scores[str(fid)] = {
+            "score": result.get("score"),
+            "risk_level": result.get("risk_level"),
+            "default_probability": result.get("default_probability"),
+            "model_enabled": bool((result.get("model_status") or {}).get("enabled")),
+        }
+    return {"scores": scores}
 
 
 @router.get("/insurance/yield-prediction/{plot_id}", dependencies=[InsuranceOnly])

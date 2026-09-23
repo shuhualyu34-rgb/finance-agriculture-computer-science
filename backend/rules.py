@@ -3,6 +3,7 @@
 单一定义、处处复用:API 计算、种子生成、单元测试共用同一套公式。
 """
 
+import json
 from decimal import ROUND_HALF_UP, Decimal
 
 # 保险:保额 1500 元/亩,总保费 = 保额 × 5%,农户自缴 = 总保费 × 20%(政府补贴 80%)
@@ -39,6 +40,46 @@ def insurance_quote(
         "total_premium": float(total_premium),
         "farmer_premium": float(farmer_premium),
         "government_subsidy": float(_money(total_premium - farmer_premium)),
+    }
+
+
+def product_quote(area_mu: float, product: dict) -> dict[str, float | str]:
+    """按保险产品配置试算，兼容原有基础种植保险公式。"""
+    quote = insurance_quote(
+        area_mu,
+        per_mu=float(product["insured_amount_per_mu"]),
+        premium_rate=float(product["premium_rate"]),
+        farmer_share=1 - float(product["government_subsidy_rate"]),
+    )
+    quote["product_code"] = product.get("product_code", "COST-001")
+    quote["product_type"] = product.get("product_type", "COST")
+    return quote
+
+
+def weather_index_assessment(
+    insured_amount: float,
+    trigger_config: dict | str | None,
+    wind_speed_kmh: float = 0,
+    rainfall_mm: float = 0,
+) -> dict[str, float | bool | str]:
+    """演示级气象指数定损：达到任一阈值即触发，赔付比例封顶 100%。"""
+    config = json.loads(trigger_config) if isinstance(trigger_config, str) else (trigger_config or {})
+    wind_threshold = float(config.get("wind_speed_kmh", 80))
+    rain_threshold = float(config.get("rainfall_mm", 120))
+    wind_ratio = float(wind_speed_kmh) / wind_threshold if wind_threshold else 0
+    rain_ratio = float(rainfall_mm) / rain_threshold if rain_threshold else 0
+    trigger_ratio = max(wind_ratio, rain_ratio)
+    triggered = trigger_ratio >= 1
+    loss_rate = min(1.0, max(0.0, (trigger_ratio - 0.8) / 0.8)) if triggered else 0.0
+    return {
+        "triggered": triggered,
+        "loss_rate": round(loss_rate, 4),
+        "claim_amount": claim_amount(insured_amount, loss_rate),
+        "wind_threshold_kmh": wind_threshold,
+        "rainfall_threshold_mm": rain_threshold,
+        "wind_speed_kmh": float(wind_speed_kmh),
+        "rainfall_mm": float(rainfall_mm),
+        "source": "DEMO_INPUT",
     }
 
 

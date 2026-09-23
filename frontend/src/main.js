@@ -9,6 +9,7 @@ import {
   Empty,
   Field,
   Form,
+  Icon,
   Image,
   NavBar,
   NoticeBar,
@@ -17,6 +18,7 @@ import {
   PullRefresh,
   Step,
   Steps,
+  Switch,
   Tab,
   Tabbar,
   TabbarItem,
@@ -37,6 +39,7 @@ app.use(Divider)
 app.use(Empty)
 app.use(Field)
 app.use(Form)
+app.use(Icon)
 app.use(Image)
 app.use(NavBar)
 app.use(NoticeBar)
@@ -45,6 +48,7 @@ app.use(Popup)
 app.use(PullRefresh)
 app.use(Step)
 app.use(Steps)
+app.use(Switch)
 app.use(Tab)
 app.use(Tabbar)
 app.use(TabbarItem)

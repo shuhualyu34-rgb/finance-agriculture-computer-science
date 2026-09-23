@@ -1,11 +1,13 @@
 """丹邱丝苗米普惠产融服务平台 API(阶段 2:七端全通)。"""
 
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from backend import migrate
 from backend.auth import require_roles
 from backend.config import settings
 from backend.routers import (
@@ -23,7 +25,15 @@ from backend.routers import (
     uploads,
 )
 
-app = FastAPI(title="丹邱丝苗米普惠产融服务平台 API", version="0.3.0")
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # 启动时补齐数据库迁移(全新卷与存量卷都安全,详见 backend/migrate.py)
+    migrate.run_with_retry()
+    yield
+
+
+app = FastAPI(title="丹邱丝苗米普惠产融服务平台 API", version="0.3.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

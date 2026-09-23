@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 
 COPY backend/ backend/
 COPY bigscreen/ bigscreen/
+COPY migrations/ migrations/
 
 EXPOSE 8010
 

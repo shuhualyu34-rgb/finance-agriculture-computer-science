@@ -17,6 +17,14 @@
       <el-table-column label="风险等级" width="90">
         <template #default="{ row }">{{ riskMap[row.risk_level] || row.risk_level }}</template>
       </el-table-column>
+      <el-table-column label="信用评分" width="100">
+        <template #default="{ row }">
+          <span v-if="scoreByFarmer[row.farmer_id]" :style="scoreStyle(scoreByFarmer[row.farmer_id].score)">
+            {{ scoreByFarmer[row.farmer_id].score }} 分
+          </span>
+          <span v-else class="muted">查看画像</span>
+        </template>
+      </el-table-column>
       <el-table-column label="认证状态" width="90">
         <template #default="{ row }">{{ certStatusMap[row.certification_status] || row.certification_status }}</template>
       </el-table-column>
@@ -48,7 +56,7 @@
           <el-descriptions-item label="认证状态">{{ certStatusMap[profile.certification_status] || profile.certification_status }}</el-descriptions-item>
         </el-descriptions>
 
-        <h4>信用评分（算法模型）</h4>
+        <h4>实际信用评分（300—900分）</h4>
         <el-alert
           v-if="credit && credit.model_status && !credit.model_status.enabled"
           type="warning" :closable="false" show-icon
@@ -62,7 +70,7 @@
                 fontSize: '20px', fontWeight: 700,
                 color: credit.score >= 600 ? '#67c23a' : credit.score >= 450 ? '#e6a23c' : '#f56c6c'
               }"
-            >{{ credit.score }}</span>
+            >{{ credit.score }} 分</span>
           </el-descriptions-item>
           <el-descriptions-item label="风险等级">
             <el-tag :type="credit.risk_level === 'LOW' ? 'success' : credit.risk_level === 'MEDIUM' ? 'warning' : 'danger'">
@@ -70,7 +78,11 @@
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="违约概率">
-            {{ credit.default_probability != null ? (credit.default_probability * 100).toFixed(2) + '%' : '-' }}
+            <span v-if="credit.default_probability != null">
+              {{ (credit.default_probability * 100).toFixed(2) + '%' }}
+              <el-tag v-if="credit.default_probability_source === 'score-implied-estimate'" size="small" type="info">估算</el-tag>
+            </span>
+            <span v-else>-</span>
           </el-descriptions-item>
         </el-descriptions>
 
@@ -132,6 +144,7 @@ import { fmtDateTime, fmtMoney, loanResultMap, certStatusMap, policyStatusMap, r
 
 const tab = ref('PENDING')
 const rows = ref([])
+const scoreByFarmer = ref({})
 const loading = ref(false)
 const profileVisible = ref(false)
 const profile = ref(null)
@@ -145,7 +158,21 @@ async function load() {
   loading.value = true
   try {
     rows.value = await http.get('/api/bank/loans', { params: { result: tab.value } })
+    scoreByFarmer.value = {}
+    // 列表评分走批量接口,单请求返回前 50 户,避免逐户调用的 N+1;
+    // 完整特征和模型状态仍在画像抽屉中查看。
+    const farmers = [...new Set(rows.value.slice(0, 50).map((row) => row.farmer_id))]
+    if (farmers.length) {
+      try {
+        const res = await http.get('/api/bank/credit-scores', { params: { farmer_ids: farmers.join(',') } })
+        scoreByFarmer.value = res.scores || {}
+      } catch (e) { /* 批量评分失败不影响列表展示 */ }
+    }
   } finally { loading.value = false }
+}
+
+function scoreStyle(score) {
+  return { fontWeight: 700, color: score >= 600 ? '#67c23a' : score >= 450 ? '#e6a23c' : '#f56c6c' }
 }
 
 async function showProfile(row) {
