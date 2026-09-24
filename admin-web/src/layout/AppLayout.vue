@@ -21,7 +21,7 @@
           <el-button size="small" @click="logout">退出登录</el-button>
         </div>
       </el-header>
-      <el-main class="admin-main"><router-view /></el-main>
+      <el-main class="admin-main" :class="roleTheme"><router-view /></el-main>
     </el-container>
   </el-container>
 </template>
@@ -57,6 +57,15 @@ const allMenus = [
 
 const menus = computed(() => allMenus.filter((m) => hasRole(...m.roles)))
 const roleText = computed(() => (auth.user?.roles || []).map((r) => roleMap[r] || r).join('、'))
+const roleTheme = computed(() => {
+  const roles = auth.user?.roles || []
+  if (roles.includes('ADMIN')) return 'theme-admin'
+  if (roles.includes('BANK')) return 'theme-bank'
+  if (roles.includes('GOVERNMENT')) return 'theme-government'
+  if (roles.includes('INSURANCE')) return 'theme-insurance'
+  if (roles.includes('OPERATOR')) return 'theme-operator'
+  return 'theme-admin'
+})
 
 function logout() {
   clearAuth()
@@ -84,9 +93,14 @@ function logout() {
 .user { color: #66725c; }
 .admin-main {
   overflow: auto;
-  background: linear-gradient(180deg, rgba(255,252,236,.43), rgba(244,239,211,.36)), url('/images/rice-field-bg.jpg') center / cover fixed no-repeat;
+  background: linear-gradient(180deg, rgba(255,252,236,.28), rgba(244,239,211,.22)), url('/images/rice-field-bg.jpg') center / cover fixed no-repeat;
   padding: 22px 24px;
 }
+.admin-main.theme-bank { background: linear-gradient(180deg, rgba(245,249,247,.29), rgba(235,241,234,.23)), url('/images/background-bank.jpg') center / cover fixed no-repeat; }
+.admin-main.theme-government { background: linear-gradient(180deg, rgba(248,250,244,.29), rgba(238,243,227,.23)), url('/images/background-government.jpg') center / cover fixed no-repeat; }
+.admin-main.theme-insurance { background: linear-gradient(180deg, rgba(247,249,250,.28), rgba(238,243,237,.22)), url('/images/background-insurance.jpg') center / cover fixed no-repeat; }
+.admin-main.theme-operator { background: linear-gradient(180deg, rgba(255,250,238,.30), rgba(247,242,226,.24)), url('/images/background-operator.jpg') center / cover fixed no-repeat; }
+.admin-main.theme-admin { background: linear-gradient(180deg, rgba(246,247,243,.31), rgba(233,238,224,.24)), url('/images/background-admin.jpg') center / cover fixed no-repeat; }
 @media (max-width: 760px) {
   .admin-aside { width: 232px !important; }
   .admin-main { padding: 14px; }

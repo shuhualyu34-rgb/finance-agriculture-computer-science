@@ -2,7 +2,6 @@
   <div class="page government-page">
     <div class="toolbar">
       <el-button type="primary" @click="load" :loading="loading">刷新数据</el-button>
-      <span class="muted">农业局监管员、乡镇农技员共用监管工作台；操作会记录当前登录人员。</span>
     </div>
 
     <el-row :gutter="12" class="stats">
