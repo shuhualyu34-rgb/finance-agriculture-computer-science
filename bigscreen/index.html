@@ -8,47 +8,68 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: radial-gradient(1200px 600px at 50% -10%, #123a5e 0%, #0a1a2e 55%, #060d18 100%);
-    color: #d7e7f5; font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: linear-gradient(180deg, rgba(255,252,236,.30), rgba(244,239,211,.24)), url("rice-field-bg.jpg") center / cover fixed no-repeat;
+    color: #293a28; font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
     min-height: 100vh; overflow: hidden;
   }
-  .screen { display: grid; grid-template-rows: 64px 1fr 190px; height: 100vh; padding: 12px 16px; gap: 12px; }
+  .screen { display: grid; grid-template-rows: 64px 1fr 142px; height: 100vh; padding: 12px 16px; gap: 12px; }
   header { display: flex; align-items: center; justify-content: space-between;
-    background: linear-gradient(90deg, rgba(28,80,130,.55), rgba(12,35,60,.4));
-    border: 1px solid #2a5d8f; border-radius: 8px; padding: 0 22px; }
-  header h1 { font-size: 26px; letter-spacing: 4px; color: #7fd4ff;
-    text-shadow: 0 0 14px rgba(80,180,255,.55); font-weight: 700; }
-  header .right { text-align: right; font-size: 14px; color: #9fc3e0; }
-  header .clock { font-size: 20px; color: #bfe6ff; font-family: Consolas, monospace; }
-  main { display: grid; grid-template-columns: 1.35fr 1fr; gap: 12px; min-height: 0; }
-  .panel { border: 1px solid #2a5d8f; border-radius: 8px; background: rgba(10,30,52,.55);
-    display: flex; flex-direction: column; overflow: hidden; }
-  .panel-title { font-size: 15px; padding: 8px 14px; color: #8fd0ff; letter-spacing: 2px;
-    border-bottom: 1px solid #1d4772; background: linear-gradient(90deg, rgba(38,90,145,.5), transparent); }
-  .panel-title::before { content: "▍"; color: #57c2ff; margin-right: 6px; }
-  #map { flex: 1; min-height: 0; }
-  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; align-content: start; overflow-y: auto; }
-  .card { border: 1px solid #24557f; border-radius: 8px; padding: 12px 14px; background: rgba(16,45,75,.6); }
-  .card .label { font-size: 13px; color: #9fc3e0; }
-  .card .value { font-size: 26px; font-weight: 700; color: #ffe9a8; margin-top: 4px;
-    font-family: Consolas, monospace; text-shadow: 0 0 10px rgba(255,220,140,.35); }
-  .card .value small { font-size: 13px; color: #9fc3e0; font-weight: 400; margin-left: 3px; }
-  .card.hl .value { color: #7dffb5; text-shadow: 0 0 10px rgba(90,255,160,.35); }
-  footer { border: 1px solid #2a5d8f; border-radius: 8px; background: rgba(10,30,52,.55); overflow: hidden; display: flex; flex-direction: column; }
+    background: linear-gradient(100deg, #fffef8, #f3f2df);
+    border: 1px solid #cbd6b8; border-radius: 16px; padding: 0 22px; box-shadow: 0 6px 20px rgba(59,80,47,.08); }
+  header h1 { font-size: 26px; letter-spacing: 4px; color: #4f713c;
+    text-shadow: 0 2px 0 rgba(255,255,255,.7); font-weight: 700; }
+  header .right { text-align: right; font-size: 14px; color: #697b5a; }
+  header .clock { font-size: 20px; color: #8e713d; font-family: Consolas, monospace; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-height: 0; }
+  .panel { border: 1px solid #cbd6b8; border-radius: 16px; background: #fffef8;
+    display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 24px rgba(59,80,47,.075); }
+  .panel-title { font-size: 15px; padding: 9px 14px; color: #526e3e; letter-spacing: 2px;
+    border-bottom: 1px solid #e1e5d1; background: linear-gradient(90deg, rgba(222,232,204,.8), rgba(250,249,239,.65)); }
+  .panel-title::before { content: "🌿"; margin-right: 7px; }
+  .right-dashboard { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 10px; min-height: 0; }
+  .cards { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-content: start; }
+  .card { min-width: 0; border: 1px solid #dbe1cb; border-radius: 12px; padding: 9px 10px; background: #fffef8; box-shadow: 0 3px 10px rgba(59,80,47,.05); }
+  .card .label { font-size: 13px; color: #526148; font-weight: 600; }
+  .card .value { font-size: 21px; font-weight: 700; color: #a27e3e; margin-top: 3px;
+    font-family: Consolas, monospace; }
+  .card .value small { font-size: 13px; color: #7e8972; font-weight: 400; margin-left: 3px; }
+  .card.hl .value { color: #527a43; }
+  .chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 10px; min-height: 0; }
+  .chart-panel { border: 1px solid #dbe1cb; border-radius: 13px; background: rgba(255,254,248,.97); overflow: hidden; min-width: 0; min-height: 0; box-shadow: 0 4px 14px rgba(59,80,47,.055); }
+  .chart-title { height: 34px; padding: 8px 12px 4px; color: #526e3e; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+  .chart { height: calc(100% - 34px); min-height: 120px; width: 100%; }
+  footer { border: 1px solid #cbd6b8; border-radius: 16px; background: #fffef8; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(59,80,47,.075); }
   .ticker { flex: 1; overflow: hidden; position: relative; padding: 6px 0; }
   .ticker ul { list-style: none; animation: scrollUp 26s linear infinite; }
-  .ticker li { line-height: 34px; padding: 0 18px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ticker li { line-height: 34px; padding: 0 18px; font-size: 14px; font-weight: 500; color: #34412f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ticker li .tag { display: inline-block; min-width: 40px; text-align: center; border-radius: 4px;
-    margin-right: 10px; padding: 1px 6px; font-size: 12px; background: #1d4772; color: #7fd4ff; }
-  .ticker li .tag.农事 { background: #1e5c40; color: #8affc4; }
-  .ticker li .tag.投保 { background: #5c4a1e; color: #ffe1a8; }
-  .ticker li .tag.理赔 { background: #5c1e1e; color: #ffb0b0; }
-  .ticker li .tag.认养 { background: #3a1e5c; color: #d5b0ff; }
-  .ticker li .tag.贷款 { background: #1e4a5c; color: #a8e6ff; }
-  .ticker li .tag.订单 { background: #5c2e1e; color: #ffc4a8; }
+    margin-right: 10px; padding: 1px 6px; font-size: 12px; background: #e4ecd8; color: #527a43; }
+  .ticker li .tag.农事 { background: #e0ead1; color: #476b3d; }
+  .ticker li .tag.投保 { background: #f1e7c9; color: #8a6b2e; }
+  .ticker li .tag.理赔 { background: #f3dddd; color: #99504a; }
+  .ticker li .tag.认养 { background: #e9e1ef; color: #76588b; }
+  .ticker li .tag.贷款 { background: #dce9e3; color: #456e62; }
+  .ticker li .tag.订单 { background: #f0e2d5; color: #94613b; }
   @keyframes scrollUp { from { transform: translateY(0); } to { transform: translateY(-50%); } }
-  .legend { display: flex; gap: 16px; padding: 8px 16px 2px; font-size: 12px; color: #9fc3e0; }
+  .legend { display: flex; gap: 16px; padding: 8px 16px 2px; font-size: 12px; color: #65765a; }
   .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; }
+  @media (max-width: 1100px) {
+    .screen { grid-template-rows: 56px minmax(0, 1fr) 110px; padding: 8px; gap: 8px; }
+    main { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+    .card { padding: 6px 7px; }
+    .card .label { font-size: 11px; }
+    .card .value { font-size: 16px; }
+    .chart-grid { gap: 6px; }
+    header h1 { font-size: 19px; letter-spacing: 2px; }
+  }
+  @media (max-height: 760px) {
+    .screen { grid-template-rows: 52px minmax(0, 1fr) 94px; padding: 7px; gap: 7px; }
+    .card { padding: 5px 7px; }
+    .chart-title { height: 28px; padding-top: 6px; }
+    .chart { height: calc(100% - 28px); min-height: 90px; }
+    .ticker li { line-height: 26px; font-size: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -61,19 +82,14 @@
     </div>
   </header>
   <main>
-    <div class="panel">
-      <div class="panel-title">丹邱村地块分布(按认证状态着色 · 滚轮缩放)</div>
-      <div class="legend">
-        <span><i style="background:#2fa866"></i>已认证地块</span>
-        <span><i style="background:#d9a521"></i>认证中/整改</span>
-        <span><i style="background:#4b6f93"></i>未认证</span>
-        <span><i style="background:#8a5fd0"></i>开放认养(描边)</span>
-      </div>
-      <div id="map"></div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">产业核心指标(实时)</div>
+    <div class="right-dashboard">
       <div class="cards" id="cards"></div>
+      <div class="chart-grid">
+        <section class="chart-panel"><div class="chart-title">近 6 个月 · 农事记录趋势</div><div class="chart" id="chart-record-trend"></div></section>
+        <section class="chart-panel"><div class="chart-title">平台销售额趋势（元）</div><div class="chart" id="chart-sales-trend"></div></section>
+        <section class="chart-panel"><div class="chart-title">农事类型分布</div><div class="chart" id="chart-record-types"></div></section>
+        <section class="chart-panel"><div class="chart-title">认证农户构成</div><div class="chart" id="chart-certifications"></div></section>
+      </div>
     </div>
   </main>
   <footer>
@@ -120,9 +136,9 @@ function renderCards(cards) {
 }
 
 function certColor(plot) {
-  if (plot.cert_status === 'APPROVED') return '#2fa866';
-  if (plot.cert_status === 'PENDING' || plot.cert_status === 'RECTIFYING') return '#d9a521';
-  return '#4b6f93';
+  if (plot.cert_status === 'APPROVED') return '#7f9b54';
+  if (plot.cert_status === 'PENDING' || plot.cert_status === 'RECTIFYING') return '#d1a64c';
+  return '#9eaa85';
 }
 
 let mapChart = null;
@@ -166,10 +182,10 @@ function renderMap(map) {
             shape: { points },
             style: {
               fill: params.data.color, opacity: 0.82,
-              stroke: params.data.open_for_adoption ? '#b98aff' : 'rgba(255,255,255,.55)',
+              stroke: params.data.open_for_adoption ? '#8a7050' : 'rgba(83,101,63,.55)',
               lineWidth: params.data.open_for_adoption ? 2 : 0.8
             },
-            emphasisStyle: { fill: '#7fd4ff', opacity: 1 }
+            emphasisStyle: { fill: '#b4c985', opacity: 1 }
           };
         }
       },
@@ -193,12 +209,57 @@ function renderTicker(items) {
   ul.innerHTML = html + html;  // 双份实现无缝滚动
 }
 
+const charts = {};
+function setChart(id, option) {
+  const el = document.getElementById(id);
+  if (!charts[id]) charts[id] = echarts.init(el);
+  charts[id].setOption(option, true);
+}
+const chartText = '#59634e';
+const axisStyle = { axisLabel: { color: chartText, fontSize: 10 }, axisLine: { lineStyle: { color: '#d7ddc8' } } };
+function renderCharts(data) {
+  if (!data) return;
+  const months = data.months || [];
+  const grid = { left: 42, right: 16, top: 16, bottom: 28, containLabel: true };
+  setChart('chart-record-trend', {
+    color: ['#78965a'], tooltip: { trigger: 'axis' }, grid,
+    xAxis: { type: 'category', data: months.map(m => m.slice(5) + '月'), ...axisStyle },
+    yAxis: { type: 'value', minInterval: 1, ...axisStyle, splitLine: { lineStyle: { color: '#edf0e5' } } },
+    series: [{ type: 'bar', data: data.records || [], barMaxWidth: 25, itemStyle: { borderRadius: [5,5,0,0] }, showBackground: true, backgroundStyle: { color: '#f2f4e9', borderRadius: [5,5,0,0] } }]
+  });
+  setChart('chart-sales-trend', {
+    color: ['#c99a46'], tooltip: { trigger: 'axis', valueFormatter: v => '¥' + Number(v || 0).toLocaleString('zh-CN') }, grid,
+    xAxis: { type: 'category', data: months.map(m => m.slice(5) + '月'), ...axisStyle },
+    yAxis: { type: 'value', axisLabel: { color: chartText, fontSize: 10, formatter: v => v >= 10000 ? (v / 10000) + '万' : v }, axisLine: { lineStyle: { color: '#d7ddc8' } }, splitLine: { lineStyle: { color: '#edf0e5' } } },
+    series: [{ type: 'line', data: data.sales || [], smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, areaStyle: { opacity: .16 } }]
+  });
+  const recordNames = { SOWING: '播种', SEEDLING: '育秧', TRANSPLANTING: '插秧', FERTILIZING: '施肥', PESTICIDE: '打药', IRRIGATION: '灌溉', HARVEST: '收割', QUALITY_TEST: '米质检测' };
+  const records = (data.record_types || []).map(item => ({ name: recordNames[item.name] || item.name || '其他', value: Number(item.value || 0) }));
+  setChart('chart-record-types', {
+    color: ['#668b4f','#d0a44e','#8aa36e','#b77645','#75a09a','#a6b86e','#dfc576','#8d7950'],
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } }, grid: { left: 68, right: 20, top: 8, bottom: 12, containLabel: true },
+    xAxis: { type: 'value', minInterval: 1, axisLabel: { color: chartText, fontSize: 10 }, splitLine: { lineStyle: { color: '#edf0e5' } } },
+    yAxis: { type: 'category', data: records.map(v => v.name).reverse(), axisLabel: { color: chartText, fontSize: 10 }, axisLine: { show: false }, axisTick: { show: false } },
+    series: [{ type: 'bar', data: records.map(v => v.value).reverse(), barMaxWidth: 17, itemStyle: { borderRadius: [0,5,5,0], color: params => ['#668b4f','#d0a44e','#8aa36e','#b77645','#75a09a','#a6b86e','#dfc576','#8d7950'][params.dataIndex % 8] }, label: { show: true, position: 'right', color: chartText, fontSize: 10 } }]
+  });
+  const certNames = { CERTIFIED: '已认证', PENDING: '待审核', REJECTED: '未通过', UNVERIFIED: '未认证' };
+  setChart('chart-certifications', {
+    color: ['#668b4f','#d0a44e','#b77645','#a6b86e','#8aa36e'], tooltip: { trigger: 'item', formatter: '{b}：{c} 户（{d}%）' },
+    legend: { bottom: 0, left: 'center', textStyle: { color: chartText, fontSize: 10 }, itemWidth: 9, itemHeight: 9 },
+    series: [{ type: 'pie', radius: ['38%','66%'], center: ['50%','43%'], avoidLabelOverlap: true,
+      itemStyle: { borderColor: '#fffef8', borderWidth: 3, borderRadius: 5 },
+      label: { color: chartText, fontSize: 10, formatter: '{b}\n{d}%' },
+      data: (data.certifications || []).map(v => ({ name: certNames[v.name] || v.name || '其他', value: Number(v.value || 0) })) }]
+  });
+  Object.values(charts).forEach(chart => chart.resize());
+}
+
 async function refresh() {
   try {
     const res = await fetch(API + '/api/government/dashboard');
     const data = await res.json();
     renderCards(data.cards);
-    renderMap(data.map);
+    renderCharts(data.charts);
     renderTicker(data.dynamics || []);
   } catch (e) {
     console.error('刷新失败', e);

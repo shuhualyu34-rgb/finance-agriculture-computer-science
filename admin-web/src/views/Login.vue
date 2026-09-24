@@ -2,17 +2,15 @@
   <div class="login-wrap">
     <el-card class="login-card">
       <h2>丹邱丝苗米普惠产融服务平台</h2>
-      <p class="sub">管理后台登录（演示验证码：1234）</p>
       <el-form :model="form" label-width="70px">
         <el-form-item label="手机号">
           <el-input v-model="form.phone" placeholder="请输入手机号" maxlength="11" />
         </el-form-item>
         <el-form-item label="验证码">
-          <el-input v-model="form.captcha" placeholder="固定 1234" maxlength="4" @keyup.enter="doLogin" />
+          <el-input v-model="form.captcha" placeholder="请输入验证码" maxlength="4" @keyup.enter="doLogin" />
         </el-form-item>
         <el-button type="primary" style="width: 100%" :loading="loading" @click="doLogin">登 录</el-button>
       </el-form>
-      <el-divider>演示账号（点击一键填入）</el-divider>
       <div class="demo">
         <el-button v-for="a in accounts" :key="a.phone" size="small" @click="fill(a)">
           {{ a.label }} {{ a.phone }}
@@ -31,7 +29,7 @@ import { setAuth } from '../store/auth'
 
 const router = useRouter()
 const loading = ref(false)
-const form = reactive({ phone: '', captcha: '1234' })
+const form = reactive({ phone: '', captcha: '' })
 
 const accounts = [
   { label: '银行', phone: '13764807553' },
@@ -44,7 +42,6 @@ const accounts = [
 
 function fill(a) {
   form.phone = a.phone
-  form.captcha = '1234'
 }
 
 async function doLogin() {
@@ -63,8 +60,8 @@ async function doLogin() {
 </script>
 
 <style scoped>
-.login-wrap { height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1f2d3d, #2f6f4f); }
-.login-card { width: 420px; }
-.sub { color: #909399; font-size: 13px; }
-.demo { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.login-wrap { height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, rgba(255,252,238,.53), rgba(248,243,217,.42)), url('/images/rice-field-bg.jpg') center / cover no-repeat; }
+.login-card { width: 420px; background: #fffef8; border: 1px solid #d9ddc6; box-shadow: 0 16px 48px rgba(59,67,38,.18); }
+.login-card h2 { color: #344532; font-weight: 750; }
+.demo { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
 </style>

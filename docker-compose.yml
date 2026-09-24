@@ -25,7 +25,7 @@ services:
       - ./danqiu_platform_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./danqiu_rice_seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
     ports:
-      - "127.0.0.1:3307:3306"   # 宿主机 3307 -> 容器 3306,便于本地调试
+      - "127.0.0.1:${MYSQL_HOST_PORT:-3307}:3306"   # 默认宿主机 3307；端口冲突时可用 MYSQL_HOST_PORT 覆盖
 
   api:
     build:

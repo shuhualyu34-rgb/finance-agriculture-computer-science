@@ -97,7 +97,7 @@ def inspection_plots(user: CurrentUser) -> list[dict[str, Any]]:
 
 @router.get("/dashboard")
 def dashboard() -> dict[str, Any]:
-    """大屏一次拉取:卡片指标 + 地块地图(GeoJSON 边界)+ 最新动态。"""
+    """大屏一次拉取:卡片指标 + 地块地图 + 图表统计 + 最新动态。"""
     cards = query(
         """
         SELECT
@@ -147,7 +147,59 @@ def dashboard() -> dict[str, Any]:
         FROM farm_plot WHERE boundary_json IS NOT NULL
         """
     )[0]
-    return {"cards": cards, "map": {"center": center, "plots": plots}, "dynamics": dynamics}
+
+    today = date.today()
+    months: list[date] = []
+    cursor = today.replace(day=1)
+    for _ in range(5):
+        cursor = (cursor - timedelta(days=1)).replace(day=1)
+    for _ in range(6):
+        months.append(cursor)
+        cursor = (cursor.replace(day=28) + timedelta(days=4)).replace(day=1)
+    month_labels = [month.strftime("%Y-%m") for month in months]
+    month_start = months[0]
+    month_end = cursor
+
+    def month_counts(sql: str) -> dict[str, int | float]:
+        return {row["month"]: row["value"] or 0 for row in query(sql, (month_start, month_end))}
+
+    record_trend = month_counts(
+        """SELECT DATE_FORMAT(record_date, '%%Y-%%m') AS month, COUNT(*) AS value
+           FROM farm_record WHERE record_date >= %s AND record_date < %s
+           GROUP BY DATE_FORMAT(record_date, '%%Y-%%m')"""
+    )
+    sales_trend = month_counts(
+        """SELECT DATE_FORMAT(created_at, '%%Y-%%m') AS month,
+                  COALESCE(SUM(total_amount), 0) AS value
+           FROM sales_order WHERE source = 'PLATFORM' AND status <> 'CANCELLED'
+             AND created_at >= %s AND created_at < %s
+           GROUP BY DATE_FORMAT(created_at, '%%Y-%%m')"""
+    )
+    record_types = query(
+        "SELECT record_type AS name, COUNT(*) AS value FROM farm_record GROUP BY record_type ORDER BY value DESC"
+    )
+    certifications = query(
+        "SELECT certification_status AS name, COUNT(*) AS value FROM farmer_profile GROUP BY certification_status"
+    )
+    village_area = query(
+        """SELECT village AS name, COALESCE(SUM(area_mu), 0) AS value
+           FROM farm_plot WHERE status = 'ACTIVE' GROUP BY village
+           ORDER BY value DESC LIMIT 8"""
+    )
+    charts = {
+        "months": month_labels,
+        "records": [record_trend.get(label, 0) for label in month_labels],
+        "sales": [sales_trend.get(label, 0) for label in month_labels],
+        "record_types": record_types,
+        "certifications": certifications,
+        "village_area": village_area,
+    }
+    return {
+        "cards": cards,
+        "map": {"center": center, "plots": plots},
+        "charts": charts,
+        "dynamics": dynamics,
+    }
 
 
 def _dynamics() -> list[dict[str, Any]]:

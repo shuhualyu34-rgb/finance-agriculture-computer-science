@@ -1,7 +1,29 @@
-body { margin: 0; font-family: "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; }
-.page { padding: 16px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.stat-card { text-align: center; }
+:root {
+  --el-color-primary: #5a7c42;
+  --el-color-primary-light-3: #88a76b;
+  --el-color-primary-light-5: #aec29a;
+  --el-color-primary-light-7: #d1dcc4;
+  --el-color-primary-light-9: #f0f3e9;
+  --el-color-success: #718a50;
+  --el-color-warning: #bd9142;
+  --el-border-color: #e1e2ce;
+  --el-border-color-light: #e9e9db;
+  --el-fill-color-light: #f5f5ec;
+  --el-bg-color: #fffef9;
+}
+body { margin: 0; font-family: "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f4e9; color: #293a28; font-weight: 500; }
+.page { padding: 18px; }
+.toolbar { margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.stat-card { text-align: center; border: 1px solid #e3e4d1 !important; border-radius: 15px !important; box-shadow: 0 5px 18px rgba(67,82,48,.055) !important; }
+.el-card { --el-card-border-color: #d9ddc6; border-radius: 15px; background: #fffef8; box-shadow: 0 5px 18px rgba(67,82,48,.07); }
+.el-table { --el-table-header-bg-color: #eff1e2; --el-table-row-hover-bg-color: #f6f7ed; --el-table-border-color: #e5e5d7; border-radius: 12px; overflow: hidden; }
+.el-table { --el-table-bg-color: #fffef8; --el-table-tr-bg-color: #fffef8; --el-table-text-color: #34412f; }
+.el-table th.el-table__cell { color: #3d5635; font-weight: 700; }
+.el-form-item__label, .el-descriptions__label, .el-breadcrumb__inner { color: #384832; font-weight: 600; }
+.el-dialog, .el-drawer, .el-popover { background: #fffef8; color: #293a28; }
+.el-button { border-radius: 9px; }
+.el-input__wrapper, .el-select__wrapper, .el-textarea__inner { border-radius: 9px; }
+.el-tag { border-radius: 7px; }
 @media print {
   .el-aside, .el-header, .el-tabs, .no-print { display: none !important; }
   .el-main { padding: 0 !important; }

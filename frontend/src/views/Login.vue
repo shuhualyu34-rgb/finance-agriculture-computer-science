@@ -22,11 +22,7 @@
           type="digit"
           maxlength="4"
           placeholder="请输入验证码"
-        >
-          <template #button>
-            <van-tag type="success" size="large" plain>演示验证码 {{ DEMO_CAPTCHA }}</van-tag>
-          </template>
-        </van-field>
+        />
       </van-cell-group>
       <div style="margin: 20px 16px">
         <van-button round block type="primary" native-type="submit" :loading="loading" color="#4a7c59">
@@ -35,9 +31,6 @@
       </div>
     </van-form>
 
-    <div class="muted" style="text-align:center">
-      {{ isFarmer ? '演示账号：13800015892（农户 黄强）' : '演示账号：13900015066（消费者 张玲）' }}
-    </div>
   </div>
 </template>
 
@@ -46,14 +39,13 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { login } from '../api'
-import { DEMO_CAPTCHA } from '../constants'
 
 const props = defineProps({ side: { type: String, default: 'farmer' } })
 const isFarmer = props.side === 'farmer'
 
 const router = useRouter()
 const route = useRoute()
-const phone = ref(isFarmer ? '13800015892' : '13900015066')
+const phone = ref('')
 const captcha = ref('')
 const loading = ref(false)
 
